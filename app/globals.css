@@ -1,0 +1,105 @@
+@layer theme, base, components, utilities, css;
+
+@import "tailwindcss";
+
+:root {
+  --brand: #0ea5e9;
+  --brand-dark: #0369a1;
+  --accent: #f97316;
+  --bg-base: #f8fafc;
+  --sidebar-width: 260px;
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: fixed linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #fdf4ff 100%);
+  color: #1e293b;
+  min-height: 100vh;
+}
+
+@theme {
+  --font-display: "Prompt", sans-serif;
+  --font-sans: "Prompt", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --color-brand-50:  #f0f9ff;
+  --color-brand-100: #e0f2fe;
+  --color-brand-200: #bae6fd;
+  --color-brand-300: #7dd3fc;
+  --color-brand-400: #38bdf8;
+  --color-brand-500: #0ea5e9;
+  --color-brand-600: #0284c7;
+  --color-brand-700: #0369a1;
+  --color-brand-800: #075985;
+  --color-brand-900: #0c4a6e;
+  --color-brand-950: #082f49;
+
+  --color-accent-50:  #fff7ed;
+  --color-accent-100: #ffedd5;
+  --color-accent-400: #fb923c;
+  --color-accent-500: #f97316;
+  --color-accent-600: #ea580c;
+}
+
+@utility glass {
+  @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-[0_8px_32px_0_rgba(31,38,135,0.07)];
+}
+
+@utility card {
+  @apply glass rounded-2xl;
+}
+
+@utility stat-card {
+  @apply card p-6 flex flex-col gap-2 transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-brand-500/10;
+}
+
+@utility btn-primary {
+  @apply bg-brand-600/90 hover:bg-brand-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 backdrop-blur-sm;
+}
+
+@utility btn-secondary {
+  @apply bg-white/50 hover:bg-white/80 text-slate-700 font-medium px-5 py-2.5 rounded-xl border border-white/40 transition-all duration-200 active:scale-95 backdrop-blur-sm shadow-sm;
+}
+
+@utility input-field {
+  @apply w-full bg-white/50 border border-white/60 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/50 focus:border-transparent transition-all backdrop-blur-sm;
+}
+
+@utility badge {
+  @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold backdrop-blur-md border border-white/20;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.5); border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.7); }
+
+/* Animations */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.animate-fadeInUp {
+  animation: fadeInUp 0.4s ease forwards;
+}
+
+@keyframes countUp {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.animate-countUp {
+  animation: countUp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.glass-nav-active {
+  @apply bg-brand-600/90 text-white shadow-lg shadow-brand-500/30;
+}
+
+.glass-nav-idle {
+  @apply text-slate-600 hover:bg-white/60 hover:text-slate-900;
+}

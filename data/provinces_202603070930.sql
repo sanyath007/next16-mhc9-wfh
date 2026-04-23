@@ -1,0 +1,85 @@
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('10','กรุงเทพมหานคร','Bangkok','กทม',NULL,'1'),
+	 ('11','สมุทรปราการ','Samutprakan','สป',NULL,'3'),
+	 ('12','นนทบุรี','Nonthaburi','นบ',NULL,'3'),
+	 ('13','ปทุมธานี','Pathumthani','ปท',NULL,'3'),
+	 ('14','พระนครศรีอยุธยา','Ayutthaya','อย',NULL,'3'),
+	 ('15','อ่างทอง','Angthong','อท',NULL,'3'),
+	 ('16','ลพบุรี','Lopburi','ลบ',NULL,'3'),
+	 ('17','สิงห์บุรี','Singburi','สห',NULL,'3'),
+	 ('18','ชัยนาท','Chainat','ชน',NULL,'3'),
+	 ('19','สระบุรี','Saraburi','สบ',NULL,'3');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('20','ชลบุรี','Chonburi','ชบ',NULL,'5'),
+	 ('21','ระยอง','Rayong','รย',NULL,'5'),
+	 ('22','จันทบุรี','Chanthaburi','จบ',NULL,'5'),
+	 ('23','ตราด','Trat','ตร',NULL,'5'),
+	 ('24','ฉะเชิงเทรา','Chachoengsao','ฉช',NULL,'5'),
+	 ('25','ปราจีนบุรี','Prachinburi','ปจ',NULL,'5'),
+	 ('26','นครนายก','Nakhonnayok','นย',NULL,'3'),
+	 ('27','สระแก้ว','Srakaeo','สก',NULL,'5'),
+	 ('30','นครราชสีมา','Nakhonratchasima','นม',NULL,'4'),
+	 ('31','บุรีรัมย์','Buriram','บร',NULL,'4');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('32','สุรินทร์','Surin','สร',NULL,'4'),
+	 ('33','ศรีสะเกษ','Srisaket','ศก',NULL,'4'),
+	 ('34','อุบลราชธานี','Uboratchathani','อบ',NULL,'4'),
+	 ('35','ยโสธร','Yasothon','ยส',NULL,'4'),
+	 ('36','ชัยภูมิ','Chaiyaphum','ชย',NULL,'4'),
+	 ('37','อำนาจเจริญ','Amnatcharoen','อจ',NULL,'4'),
+	 ('39','หนองบัวลำภู','Nongbualamphu','นภ',NULL,'4'),
+	 ('40','ขอนแก่น','Khonkean','ขก',NULL,'4'),
+	 ('41','อุดรธานี','Udonthani','อด',NULL,'4'),
+	 ('42','เลย','Loei','ลย',NULL,'4');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('43','หนองคาย','Nongkhai','นค',NULL,'4'),
+	 ('44','มหาสารคาม','Mahasarakham','มค',NULL,'4'),
+	 ('45','ร้อยเอ็ด','Roiet','รอ',NULL,'4'),
+	 ('46','กาฬสินธุ์','Kalasin','กส',NULL,'4'),
+	 ('47','สกลนคร','Sakonnakhon','สน',NULL,'4'),
+	 ('48','นครพนม','Nakhonphanom','นพ',NULL,'4'),
+	 ('49','มุกดาหาร','Mukdahan','มห',NULL,'4'),
+	 ('50','เชียงใหม่','Chiangmai','ชม',NULL,'2'),
+	 ('51','ลำพูน','Lamphun','ลพ',NULL,'2'),
+	 ('52','ลำปาง','Lampang','ลป',NULL,'2');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('53','อุตรดิตถ์','Uttaradit','อต',NULL,'2'),
+	 ('54','แพร่','Phrae','พร',NULL,'2'),
+	 ('55','น่าน','Nan','นน',NULL,'2'),
+	 ('56','พะเยา','Phayao','พย',NULL,'2'),
+	 ('57','เชียงราย','Chiangrai','ชร',NULL,'2'),
+	 ('58','แม่ฮ่องสอน','Maehongson','มส',NULL,'2'),
+	 ('60','นครสวรรค์','Nakhonsawan','นว',NULL,'3'),
+	 ('61','อุทัยธานี','Uthaithani','อน',NULL,'3'),
+	 ('62','กำแพงเพชร','Kamphaengphet','กพ',NULL,'3'),
+	 ('63','ตาก','Tak','ตก',NULL,'6');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('64','สุโขทัย','Sukhothai','สท',NULL,'3'),
+	 ('65','พิษณุโลก','Phitsanulok','พล',NULL,'3'),
+	 ('66','พิจิตร','Phichit','พจ',NULL,'3'),
+	 ('67','เพชรบูรณ์','Phetchabun','พช',NULL,'3'),
+	 ('70','ราชบุรี','Rachaburi','รบ',NULL,'6'),
+	 ('71','กาญจนบุรี','Kanchanaburi','กจ',NULL,'6'),
+	 ('72','สุพรรณบุรี','Suphanburi','สพ',NULL,'3'),
+	 ('73','นครปฐม','Nakhonpathom','นฐ',NULL,'3'),
+	 ('74','สมุทรสาคร','Samutsakhon','สค',NULL,'3'),
+	 ('75','สมุทรสงคราม','Samutsongkhram','สส',NULL,'3');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('76','เพชรบุรี','Phetchaburi','พบ',NULL,'6'),
+	 ('77','ประจวบคีรีขันธ์','Prachuapkhirikhan','ปข',NULL,'6'),
+	 ('80','นครศรีธรรมราช','Nakhonsithammarat','นศ',NULL,'7'),
+	 ('81','กระบี่','Krabi','กบ',NULL,'7'),
+	 ('82','พังงา','Phangnga','พง',NULL,'7'),
+	 ('83','ภูเก็ต','Phuket','ภก',NULL,'7'),
+	 ('84','สุราษฎร์ธานี','Suratthani','สฎ',NULL,'7'),
+	 ('85','ระนอง','Ranong','รน',NULL,'7'),
+	 ('86','ชุมพร','Chumphon','ชพ',NULL,'7'),
+	 ('90','สงขลา','Songkhla','สข',NULL,'7');
+INSERT INTO school_hero.provinces (id,name,name_en,short,short_en,region_id) VALUES
+	 ('91','สตูล','Satun','สต',NULL,'7'),
+	 ('92','ตรัง','Trang','ตง',NULL,'7'),
+	 ('93','พัทลุง','Phatthalung','พท',NULL,'7'),
+	 ('94','ปัตตานี','Pattani','ปน',NULL,'7'),
+	 ('95','ยะลา','Yala','ยล',NULL,'7'),
+	 ('96','นราธิวาส','Narathiwat','นธ',NULL,'7'),
+	 ('38','บึงกาฬ',NULL,'บก',NULL,'4');

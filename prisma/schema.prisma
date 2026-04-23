@@ -1,0 +1,141 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ===== AUTH =====
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String    @unique
+  password      String
+  role          Role      @default(VIEWER)
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  uploads       DataUpload[]
+  sessions      Session[]
+
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  session_token String   @unique
+  user_id      String
+  expires      DateTime
+  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+enum Role {
+  ADMIN
+  EDITOR
+  VIEWER
+}
+
+// ===== DATA =====
+// Location hierarchy models
+model Province {
+  id        Int      @id
+  name      String   @unique
+  name_en   String?
+  short     String?
+  short_en  String?
+  region_id Int?
+  districts District[]
+  records   ConsultingRecord[]
+
+  @@map("provinces")
+}
+
+model District {
+  id         Int      @id
+  name       String
+  province_id Int
+  district_id String?
+  province   Province @relation(fields: [province_id], references: [id], onDelete: Cascade)
+  schools    School[]
+  records    ConsultingRecord[]
+  
+  @@unique([province_id, name])
+  @@map("districts")
+}
+
+model School {
+  id        String   @id @default(cuid())
+  name      String
+  district_id Int
+  district  District @relation(fields: [district_id], references: [id], onDelete: Cascade)
+  records   ConsultingRecord[]
+  
+  @@unique([district_id, name])
+  @@map("schools")
+}
+
+// Statistics models
+enum StatisticType {
+  DISTRICT
+  STUDENT_PER_PERSON
+  STUDENT_PER_SESSION
+}
+
+enum StatisticStatus {
+  REQUESTED
+  RECEIVED
+  NOT_RECEIVED
+  STARTED
+  COMPLETED
+}
+
+model Statistic {
+  id          String   @id @default(cuid())
+  record_id   String
+  record      ConsultingRecord @relation(fields: [record_id], references: [id], onDelete: Cascade)
+  type        StatisticType
+  status      StatisticStatus
+  count       Int
+  
+  @@unique([record_id, type, status])
+  @@map("statistics")
+}
+
+// Data upload models
+model DataUpload {
+  id          String    @id @default(cuid())
+  filename    String
+  uploaded_at DateTime  @default(now())
+  uploaded_by String
+  user        User      @relation(fields: [uploaded_by], references: [id])
+  row_count   Int
+  year        Int
+  records     ConsultingRecord[]
+
+  @@map("data_uploads")
+}
+
+model ConsultingRecord {
+  id                 String   @id @default(cuid())
+  upload_id          String
+  upload             DataUpload @relation(fields: [upload_id], references: [id], onDelete: Cascade)
+  
+  sequence           String
+  province_id        Int
+  province           Province @relation(fields: [province_id], references: [id], onDelete: Cascade)
+  district_id        Int?
+  district           District? @relation(fields: [district_id], references: [id], onDelete: Cascade)
+  school_id          String?
+  school             School? @relation(fields: [school_id], references: [id], onDelete: Cascade)
+  
+  consultant_count   Int      @default(0)
+  statistics         Statistic[]
+
+  @@map("consulting_records")
+}
