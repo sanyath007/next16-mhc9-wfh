@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <button onClick={() => setMobileOpen(true)} className="p-2.5 bg-white/50 hover:bg-white/80 rounded-xl border border-white/40 shadow-sm transition-all active:scale-95">
               <Menu className="w-5 h-5 text-slate-700" />
             </button>
-            <span className="font-display font-bold text-slate-800 tracking-tight">ConsultTrack</span>
+            <span className="font-display font-bold text-slate-800 tracking-tight">ระบบรายงานผลงานการ Work from Home</span>
           </div>
         </div>
 

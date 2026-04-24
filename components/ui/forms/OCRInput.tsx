@@ -6,7 +6,7 @@ import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist/legacy/bui
 
 GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
 
-const OCRComponent = () => {
+const OCRInput = () => {
     const [ocrText, setOcrText] = React.useState<string>('');
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [progress, setProgress] = React.useState<number>(0);
@@ -90,4 +90,4 @@ const OCRComponent = () => {
     )
 }
 
-export default OCRComponent
+export default OCRInput

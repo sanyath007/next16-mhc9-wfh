@@ -31,8 +31,8 @@ export default function Sidebar({ onItemClick }: SidebarProps) {
           <BarChart3 className="w-5 h-5 text-white" />
         </div>
         <div>
-          <div className="font-display font-bold text-slate-900 text-lg leading-tight tracking-tight">ConsultTrack</div>
-          <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-0.5">Management Portal</div>
+          <div className="font-display font-bold text-slate-900 text-lg leading-tight tracking-tight">MHC9 WFH</div>
+          <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-0.5">รายงานผลงานการ WFH</div>
         </div>
       </div>
 

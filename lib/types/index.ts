@@ -44,3 +44,23 @@ export interface DashboardSummary {
   overallCompletionRate: number
   provinceStats: ProvinceStats[]
 }
+
+export interface ConsultRecord {
+  id: string
+  sequence: string
+  province: string
+  district?: string
+  school?: string
+  level: number
+  consultantCount: number
+  studentRequestedPerson: number
+  studentReceivedPerson: number
+  studentNotReceivedPerson: number
+  studentStartedPerson: number
+  studentCompletedPerson: number
+  studentRequestedSession: number
+  studentReceivedSession: number
+  studentNotReceivedSession: number
+  studentStartedSession: number
+  studentCompletedSession: number
+}

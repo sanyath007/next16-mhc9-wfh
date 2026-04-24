@@ -3,8 +3,8 @@ import './globals.css'
 import { Providers } from './providers'
 
 export const metadata: Metadata = {
-  title: 'ระบบติดตามการให้คำปรึกษา',
-  description: 'Dashboard สถิติการให้คำปรึกษานักเรียน',
+  title: 'ระบบรายงานผลงานการ Work from Home',
+  description: 'Dashboard สถิติผลงานการ Work from Home',
 }
 
 export default function RootLayout({
