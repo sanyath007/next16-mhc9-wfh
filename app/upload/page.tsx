@@ -2,10 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import {
-    Upload, FileText, CheckCircle2, AlertCircle,
-    Clock, Trash2, ChevronDown, Info, X
-} from 'lucide-react'
+import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X } from 'lucide-react'
 
 interface UploadRecord {
     id: string
@@ -15,14 +12,6 @@ interface UploadRecord {
     year: number
     user: { name: string; email: string }
 }
-
-const REQUIRED_COLUMNS = [
-    'ลำดับ', 'จังหวัด', 'อำเภอ', 'โรงเรียน',
-    'จำนวน Consultant ที่ให้คำปรึกษา',
-    'จำนวนอำเภอที่มีการขอคำปรึกษา',
-    'จำนวนนักเรียนที่มีการขอคำปรึกษา (รายคน)',
-    'จำนวนนักเรียนที่มีการให้คำปรึกษาสำเร็จแล้ว (รายคน)',
-]
 
 export default function UploadPage() {
     const { data: session } = useSession()
@@ -34,7 +23,6 @@ export default function UploadPage() {
     const [uploading, setUploading] = useState(false)
     const [result, setResult] = useState<{ success?: boolean; message?: string; rowCount?: number } | null>(null)
     const [history, setHistory] = useState<UploadRecord[]>([])
-    const [showCols, setShowCols] = useState(false)
 
     const fetchHistory = async () => {
         try {
@@ -95,9 +83,10 @@ export default function UploadPage() {
 
     return (
         <div className="max-w-3xl mx-auto space-y-8">
+            {/* Page Header */}
             <div>
-                <h1 className="font-display text-2xl font-bold text-slate-900">อัปโหลดข้อมูล</h1>
-                <p className="text-slate-500 mt-1 text-sm">นำเข้าไฟล์ CSV เพื่ออัปเดตข้อมูลในระบบ</p>
+                <h1 className="font-display text-2xl font-bold text-slate-900">อัปโหลดรายงาน</h1>
+                <p className="text-slate-500 mt-1 text-sm">นำเข้าไฟล์ PDF เพื่อส่งรายงานการ Work From Home</p>
             </div>
 
             {/* Viewer role message */}
@@ -209,60 +198,10 @@ export default function UploadPage() {
                     ) : (
                         <>
                             <Upload className="w-5 h-5" />
-                            อัปโหลดข้อมูลเข้าระบบ
+                            อัปโหลดรายงาน
                         </>
                     )}
                 </button>
-            </div>
-
-            {/* Required columns reference */}
-            <div className="card overflow-hidden">
-                <button
-                    onClick={() => setShowCols(!showCols)}
-                    className="w-full flex items-center justify-between p-5 hover:bg-slate-50 transition-colors"
-                >
-                    <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
-                        <Info className="w-4 h-4 text-blue-600" />
-                        </div>
-                        <span className="font-medium text-slate-800">โครงสร้างไฟล์ที่รองรับ</span>
-                    </div>
-                    <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showCols ? 'rotate-180' : ''}`} />
-                </button>
-                
-                {showCols && (
-                    <div className="px-5 pb-5 border-t border-slate-100">
-                        <p className="text-sm text-slate-600 mt-4 mb-3">
-                            ไฟล์ CSV ต้องมีคอลัมน์ต่อไปนี้ (ชื่อต้องตรงทุกตัวอักษร):
-                        </p>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {[
-                                'ลำดับ', 'จังหวัด', 'อำเภอ', 'โรงเรียน',
-                                'จำนวน Consultant ที่ให้คำปรึกษา',
-                                'จำนวนอำเภอที่มีการขอคำปรึกษา',
-                                'จำนวนอำเภอที่มีการรับคำปรึกษา',
-                                'จำนวนอำเภอที่ไม่ได้รับคำขอปรึกษา',
-                                'จำนวนอำเภอที่มีการเริ่มให้คำปรึกษาแล้ว',
-                                'จำนวนอำเภอที่มีการให้คำปรึกษาสำเร็จแล้ว',
-                                'จำนวนนักเรียนที่มีการขอคำปรึกษา (รายคน)',
-                                'จำนวนนักเรียนที่มีการรับคำปรึกษา (รายคน)',
-                                'จำนวนนักเรียนที่ไม่ได้รับคำขอปรึกษา (รายคน)',
-                                'จำนวนนักเรียนที่มีการเริ่มให้คำปรึกษาแล้ว (รายคน)',
-                                'จำนวนนักเรียนที่มีการให้คำปรึกษาสำเร็จแล้ว (รายคน)',
-                                'จำนวนนักเรียนที่มีการขอคำปรึกษา (รายครั้ง)',
-                                'จำนวนนักเรียนที่มีการรับคำปรึกษา (รายครั้ง)',
-                                'จำนวนนักเรียนที่ไม่ได้รับคำขอปรึกษา (รายครั้ง)',
-                                'จำนวนนักเรียนที่มีการเริ่มให้คำปรึกษาแล้ว (รายครั้ง)',
-                                'จำนวนนักเรียนที่มีการให้คำปรึกษาสำเร็จแล้ว (รายครั้ง)',
-                            ].map(col => (
-                                <div key={col} className="flex items-center gap-2 text-xs">
-                                <div className="w-1.5 h-1.5 bg-brand-400 rounded-full shrink-0" />
-                                <code className="font-mono text-slate-600 bg-slate-100 px-2 py-0.5 rounded">{col}</code>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                )}
             </div>
 
             {/* Upload history */}
