@@ -5,11 +5,12 @@ import { useSession, signOut } from 'next-auth/react'
 import { usePathname } from 'next/navigation'
 import {
   BarChart3, LayoutDashboard, Upload,
-  LogOut, ChevronRight
+  LogOut, ChevronRight, CalendarDays
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: 'ภาพรวม', icon: LayoutDashboard },
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/schedule', label: 'ตารางงาน', icon: CalendarDays, roles: ['ADMIN', 'EDITOR'] },
   { href: '/upload', label: 'อัปโหลดข้อมูล', icon: Upload, roles: ['ADMIN', 'EDITOR'] },
 ]
 

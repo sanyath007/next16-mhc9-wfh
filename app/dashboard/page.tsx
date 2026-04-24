@@ -34,9 +34,11 @@ export default function DashboardPage() {
       if (selectedYear !== '') {
         url += `?year=${selectedYear}`
       }
+
       const res  = await fetch(url)
       const json = await res.json()
       setData(json)
+
       // sync selectedYear from server if not explicitly set
       if (selectedYear === '' && json.selectedYear) {
         setSelectedYear(json.selectedYear)
