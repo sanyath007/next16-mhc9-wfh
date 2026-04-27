@@ -9,8 +9,9 @@ import {
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
 import { DashboardSummary, ConsultRecord } from '@/lib/types'
-import { StatCard, ProgressBar, DistrictPanel } from '@/components/ui'
+import { StatCard, DistrictPanel } from '@/components/ui'
 import { PIE_COLORS } from '@/lib/constants/dashboard'
+import EmployeeList from './EmployeeList'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface ApiData {
@@ -327,53 +328,9 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Province overview table (no selection) */}
+      {/* Work from home employee table */}
       {!selectedProvince && (
-        <div className="card overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <h3 className="font-display font-semibold text-slate-800">รายชื่อผู้ปฏิบัติงาน Work from Home</h3>
-            <span className="text-xs text-slate-400">คลิกแถวเพื่อดูรายอำเภอ</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="bg-slate-50 border-b border-slate-100">
-                  {['จังหวัด','Consultants','อำเภอ','โรงเรียน','ขอ (คน)','ได้รับ','สำเร็จ','อัตราสำเร็จ'].map(h => (
-                    <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
-                      {h}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {provinceStats.map((p, i) => (
-                  <tr
-                    key={p.province}
-                    className="hover:bg-brand-50/30 transition-colors cursor-pointer group animate-fadeInUp"
-                    style={{ animationDelay: `${i * 60}ms` }}
-                    onClick={() => setSelectedProvince(p.province)}
-                  >
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium text-slate-900">{p.province}</span>
-                        <ChevronRight className="w-3.5 h-3.5 text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity" />
-                      </div>
-                    </td>
-                    <td className="px-5 py-4 text-slate-600 text-center">{p.consultants}</td>
-                    <td className="px-5 py-4 text-slate-600 text-center">{p.districtCount}</td>
-                    <td className="px-5 py-4 text-slate-600 text-center">{p.schoolCount}</td>
-                    <td className="px-5 py-4 font-mono text-slate-700 text-right">{p.studentRequested.toLocaleString()}</td>
-                    <td className="px-5 py-4 font-mono text-slate-700 text-right">{p.studentReceived.toLocaleString()}</td>
-                    <td className="px-5 py-4 font-mono text-slate-700 text-right">{p.studentCompleted.toLocaleString()}</td>
-                    <td className="px-5 py-4 min-w-35">
-                      <ProgressBar value={p.studentCompleted} max={p.studentRequested} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <EmployeeList />
       )}
 
       {/* District drill-down */}
