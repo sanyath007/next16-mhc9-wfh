@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react'
-import { cn } from '../../../utils/tailwindcss'
+import { cn } from '@/lib/utils/tailwindcss'
 
 const ErrorMessage = ({ message, className }: { message: string, className?: string }) => {
     return (

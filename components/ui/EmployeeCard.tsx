@@ -4,6 +4,7 @@ interface Employee {
     name: string;
     position: string;
     phone: string;
+    email: string;
     address: {
         district: string;
         province: string;
