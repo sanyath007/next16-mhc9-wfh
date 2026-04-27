@@ -60,6 +60,8 @@ export default function UploadPage() {
 
         const formData = new FormData()
         formData.append('file', file)
+        formData.append('user_id', `${session?.user?.id}`) // TODO: change to employee_id instead
+        formData.append('work_date', new Date().toISOString())
 
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -217,9 +219,9 @@ export default function UploadPage() {
                                     <FileText className="w-4 h-4 text-brand-600" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-slate-800 text-sm truncate">{upload.filename} ปีการศึกษา {upload.year+543}</p>
+                                    <p className="font-medium text-slate-800 text-sm truncate">{upload.filename} ปีงบประมาณ {upload.year+543}</p>
                                     <p className="text-xs text-slate-500 mt-0.5">
-                                        โดย {upload.user.name || upload.user.email} · {upload.row_count.toLocaleString()} แถว
+                                        โดย {/* {upload.user.name || upload.user.email} · {upload.row_count.toLocaleString()} แถว */}
                                     </p>
                                 </div>
                                 <div className="text-right shrink-0">
