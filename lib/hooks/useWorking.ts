@@ -37,15 +37,15 @@ export function useWorkings ({ schedules }: { schedules: any[] | null }) {
     return { data, isLoading, error }
 }
 
-export function useSchedules ({ date }: { date: string }) {
+export function useSchedules ({ date, dep }: { date: string, dep?: string }) {
     const { data: session } = useSession()
     const [data, setData] = useState<any[] | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchSchedules = useCallback(async (date: string) => {
+    const fetchSchedules = useCallback(async (date: string, dep: string = '') => {
         try {
-            const response = await fetch(`/api/schedule?date=${date}`, {
+            const response = await fetch(`/api/schedule?date=${date}&dep=${dep}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -65,7 +65,7 @@ export function useSchedules ({ date }: { date: string }) {
 
     useEffect(() => {
         fetchSchedules(date)
-    }, [date])
+    }, [date, dep])
 
     return { data, isLoading, error }
 }
