@@ -65,6 +65,10 @@ body {
   @apply bg-white/50 hover:bg-white/80 text-slate-700 font-medium px-5 py-2.5 rounded-xl border border-white/40 transition-all duration-200 active:scale-95 backdrop-blur-sm shadow-sm;
 }
 
+@utility btn-error {
+  @apply bg-rose-500/90 hover:bg-white/80 text-slate-700 font-medium px-5 py-2.5 rounded-xl border border-white/40 transition-all duration-200 active:scale-95 backdrop-blur-sm shadow-sm;
+}
+
 @utility input-field {
   @apply w-full bg-white/50 border border-white/60 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/50 focus:border-transparent transition-all backdrop-blur-sm;
 }

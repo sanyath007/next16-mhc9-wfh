@@ -12,6 +12,7 @@ import FormField from "@/components/ui/forms/FormField";
 import DatePicker from "@/components/ui/forms/DatePicker";
 import CustomSelect from "@/components/ui/forms/CustomSelect";
 import WorkingList from "./WorkingList";
+import { cn } from "@/lib/utils/tailwindcss";
 
 export default function SchedulePage() {
     const today = new Date();
@@ -110,7 +111,14 @@ export default function SchedulePage() {
                     <h1 className="font-display text-3xl font-bold text-slate-900">ตารางงาน</h1>
                     <p className="text-sm text-slate-500 mt-1">ตารางการปฏิบัติงาน Work from Home ประจำวัน</p>
                 </div>
-                <button type="button" className="border px-3 py-2 rounded-2xl cursor-pointer" onClick={() => setShowModal(true)}>
+                <button
+                    type="button"
+                    className={cn(
+                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
+                        `glass-nav-active bg-slate-300/20 border-slate-300/30 shadow-md`
+                    )}
+                    onClick={() => setShowModal(true)}
+                >
                     เพิ่มตารางงาน
                 </button>
             </div>
@@ -144,8 +152,26 @@ export default function SchedulePage() {
                                 </div>
                             </FormField>
 
-                            <div className="mt-4 flex justify-end">
-                                <button type="button" className="border px-4 py-2 rounded-2xl cursor-pointer" onClick={onSubmit}>
+                            <div className="mt-4 flex justify-end gap-2">
+
+                                <button
+                                    type="button"
+                                    className={cn(
+                                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
+                                        `btn-secondary`
+                                    )}
+                                    onClick={() => setShowModal(false)}
+                                >
+                                    ยกเลิก
+                                </button>
+                                <button
+                                    type="button"
+                                    className={cn(
+                                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
+                                        `glass-nav-active bg-slate-300/20 border-slate-300/30 shadow-md`
+                                    )}
+                                    onClick={onSubmit}
+                                >
                                     ตกลง
                                 </button>
                             </div>
