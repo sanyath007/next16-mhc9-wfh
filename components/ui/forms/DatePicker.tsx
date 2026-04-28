@@ -58,7 +58,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         return new Date().toISOString().split('T')[0];
     });
     const [selectedTime, setSelectedTime] = useState({ hours: '08', minutes: '00' });
-    const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+    const [selectedYear, setSelectedYear] = useState(moment().year());
     const [position, setPosition] = useState({ top: 0, left: 0, direction: 'bottom' as 'top' | 'bottom' });
     const [mounted, setMounted] = useState(false);
     
@@ -106,19 +106,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
         let direction: 'top' | 'bottom';
         
         if (spaceBelow >= dropdownHeight + padding || spaceBelow >= spaceAbove) {
-        top = rect.bottom + padding;
-        direction = 'bottom';
+            top = rect.bottom + padding;
+            direction = 'bottom';
         } else {
-        top = rect.top - dropdownHeight - padding;
-        direction = 'top';
+            top = rect.top - dropdownHeight - padding;
+            direction = 'top';
         }
         
         let left = rect.left;
         if (left + dropdownWidth > window.innerWidth - padding) {
-        left = window.innerWidth - dropdownWidth - padding;
+            left = window.innerWidth - dropdownWidth - padding;
         }
         if (left < padding) {
-        left = padding;
+            left = padding;
         }
         
         setPosition({ top, left, direction });
@@ -145,24 +145,24 @@ const DatePicker: React.FC<DatePickerProps> = ({
         if (!isOpen) return;
         
         const handleClickOutside = (e: MouseEvent) => {
-        if (
-            dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
-            triggerRef.current && !triggerRef.current.contains(e.target as Node)
-        ) {
-            setIsOpen(false);
-        }
+            if (
+                dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+                triggerRef.current && !triggerRef.current.contains(e.target as Node)
+            ) {
+                setIsOpen(false);
+            }
         };
         
         const handleEscape = (e: KeyboardEvent) => {
-        if (e.key === 'Escape') setIsOpen(false);
+            if (e.key === 'Escape') setIsOpen(false);
         };
         
         document.addEventListener('mousedown', handleClickOutside);
         document.addEventListener('keydown', handleEscape);
         
         return () => {
-        document.removeEventListener('mousedown', handleClickOutside);
-        document.removeEventListener('keydown', handleEscape);
+            document.removeEventListener('mousedown', handleClickOutside);
+            document.removeEventListener('keydown', handleEscape);
         };
     }, [isOpen]);
 
@@ -180,10 +180,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
     // Generate calendar
     const generateCalendar = () => {
-        const [month] = calendarViewDate.split('-').map(Number);
+        const [year, month] = calendarViewDate.split('-').map(Number);
         const firstDay = new Date(selectedYear, month - 1, 1);
         const lastDay = new Date(selectedYear, month, 0);
-        
+
         const startDate = new Date(firstDay);
         startDate.setDate(startDate.getDate() - firstDay.getDay());
         
@@ -208,6 +208,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
     // Navigate months
     const navigateMonth = (direction: 'prev' | 'next') => {
         const date = moment(calendarViewDate);
+        console.log(date);
+        
 
         if (direction === 'prev') {
             date.add(-1, "month")
@@ -225,15 +227,15 @@ const DatePicker: React.FC<DatePickerProps> = ({
         const month = (date.getMonth() + 1).toString().padStart(2, '0');
         const day = date.getDate().toString().padStart(2, '0');
         const dateStr = `${year}-${month}-${day}`;
-        
+
         if (isDateDisabled(dateStr)) return;
-        
+
         if (enableTime) {
-        const dateTimeStr = `${dateStr}T${selectedTime.hours}:${selectedTime.minutes}:00.000Z`;
-        onChange(dateTimeStr);
+            const dateTimeStr = `${dateStr}T${selectedTime.hours}:${selectedTime.minutes}:00.000Z`;
+            onChange(dateTimeStr);
         } else {
-        onChange(dateStr);
-        setIsOpen(false);
+            onChange(dateStr);
+            setIsOpen(false);
         }
     };
 
@@ -242,9 +244,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
         setSelectedTime({ hours, minutes });
         
         if (value) {
-        const baseDate = value.split('T')[0];
-        const dateTimeStr = `${baseDate}T${hours}:${minutes}:00.000Z`;
-        onChange(dateTimeStr);
+            const baseDate = value.split('T')[0];
+            const dateTimeStr = `${baseDate}T${hours}:${minutes}:00.000Z`;
+            onChange(dateTimeStr);
         }
     };
 
@@ -258,8 +260,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         <div
             ref={dropdownRef}
             className={cn(
-                'fixed z-9999 w-80 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700',
-                'rounded-2xl shadow-2xl overflow-hidden',
+                'fixed z-[9999] w-80 glass rounded-2xl overflow-hidden border-white/40 shadow-2xl',
                 'animate-in fade-in-0 zoom-in-95 duration-150'
             )}
             style={{
@@ -268,34 +269,37 @@ const DatePicker: React.FC<DatePickerProps> = ({
             }}
         >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-900/50">
+            <div className="flex items-center justify-between p-4 bg-white/40 dark:bg-white/5 border-b border-white/20">
                 <button
                     type="button"
                     onClick={() => navigateMonth('prev')}
-                    className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-white/10 transition-colors cursor-pointer"
                 >
-                    <ChevronLeft size={18} className="text-slate-600 dark:text-slate-400" />
+                    <ChevronLeft size={18} className="text-slate-600 dark:text-slate-300" />
                 </button>
 
                 <div className="text-center">
-                    <h3 className="font-semibold text-slate-900 dark:text-white">
-                        {MONTH_TH_NAMES[currentMonth]}
+                    <h3 className="font-semibold text-slate-800 flex items-center justify-center gap-2">
+                        <span>{MONTH_TH_NAMES[currentMonth]}</span>
                         <input
                             type="number"
                             value={selectedYear + 543}
                             onChange={(e) => {
-                                const date = moment(calendarViewDate);
                                 const newYear = parseInt(e.target.value) - 543;
-                                const newDate = `${newYear}-${(date.month() + 1).toString().padStart(2, '0')}-${date.date().toString().padStart(2, '0')}`;
 
-                                setSelectedYear(newYear);
-                                setCalendarViewDate(newDate);
+                                if (!isNaN(newYear)) {
+                                    const date = moment(calendarViewDate);
+                                    console.log(date.toDate());
+                                    const newDate = `${newYear}-${(date.month() + 1).toString().padStart(2, '0')}-${date.date().toString().padStart(2, '0')}`;
+                                    setSelectedYear(newYear);
+                                    setCalendarViewDate(newDate);
+                                }
                             }}
-                            className="ml-2 w-16 text-center border border-slate-300 dark:border-slate-600 rounded px-1 py-0.5 text-sm"
+                            className="w-20 text-center bg-white/50 border border-white/40 rounded-lg px-2 py-0.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/50"
                         />
                     </h3>
                     {value && (
-                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                        <p className="text-[10px] font-medium text-slate-500 mt-1 uppercase tracking-wider">
                             {formatThaiDateShort(value)}
                             {showAge && ` (${calculateAge(value)})`}
                         </p>
@@ -305,9 +309,9 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <button
                     type="button"
                     onClick={() => navigateMonth('next')}
-                    className="p-2 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/40 dark:hover:bg-white/10 transition-colors cursor-pointer"
                 >
-                    <ChevronRight size={18} className="text-slate-600 dark:text-slate-400" />
+                    <ChevronRight size={18} className="text-slate-600 dark:text-slate-300" />
                 </button>
             </div>
 
@@ -317,8 +321,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                     <div
                         key={index}
                         className={cn(
-                            'text-center text-xs font-medium py-1',
-                            index === 0 ? 'text-red-500' : 'text-slate-500 dark:text-slate-400'
+                            'text-center text-[10px] font-bold uppercase tracking-tighter py-1',
+                            index === 0 ? 'text-rose-500' : 'text-slate-400 dark:text-slate-500'
                         )}
                     >
                         {day}
@@ -349,16 +353,19 @@ const DatePicker: React.FC<DatePickerProps> = ({
                                     onClick={() => !isDisabled && selectDate(date)}
                                     disabled={isDisabled}
                                     className={cn(
-                                        'w-9 h-9 text-sm rounded-lg transition-all duration-150 font-medium',
-                                        isDisabled && 'text-slate-300 dark:text-slate-600 cursor-not-allowed',
-                                        !isDisabled && isSelected && 'bg-primary-500 text-white shadow-md',
-                                        !isDisabled && !isSelected && isToday && 'bg-primary-100 dark:bg-primary-500/20 text-primary-600 dark:text-primary-400 font-semibold ring-1 ring-primary-300',
-                                        !isDisabled && !isSelected && !isToday && isCurrentMonth && isSunday && 'text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700',
-                                        !isDisabled && !isSelected && !isToday && isCurrentMonth && !isSunday && 'text-slate-900 dark:text-white hover:bg-slate-100 dark:hover:bg-slate-700',
-                                        !isDisabled && !isSelected && !isToday && !isCurrentMonth && 'text-slate-400 dark:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-800'
+                                        'w-9 h-9 text-sm rounded-xl transition-all duration-200 font-medium relative flex items-center justify-center',
+                                        isDisabled && 'text-slate-200 cursor-not-allowed',
+                                        !isDisabled && isSelected && 'bg-brand-500 text-white shadow-lg shadow-brand-500/30 scale-105 z-10',
+                                        !isDisabled && !isSelected && isToday && 'bg-brand-50/50 text-brand-600 ring-1 ring-brand-300',
+                                        !isDisabled && !isSelected && !isToday && isCurrentMonth && isSunday && 'text-rose-500 hover:bg-white/60',
+                                        !isDisabled && !isSelected && !isToday && isCurrentMonth && !isSunday && 'text-slate-700 hover:bg-white/60',
+                                        !isDisabled && !isSelected && !isToday && !isCurrentMonth && 'text-slate-300 hover:bg-white/40',
                                     )}
                                 >
                                     {date.getDate()}
+                                    {!isDisabled && isToday && (
+                                        <span className={`absolute bottom-1 w-1 h-1 rounded-full ${!isSelected ? "bg-brand-500" : "bg-white"}`}></span>
+                                    )}
                                 </button>
                             );
                         })}
@@ -368,26 +375,26 @@ const DatePicker: React.FC<DatePickerProps> = ({
 
             {/* Time picker */}
             {enableTime && (
-                <div className="px-4 pb-4 pt-2 border-t border-slate-200 dark:border-slate-700">
+                <div className="px-4 pb-4 pt-3 border-t border-white/20 bg-white/20 dark:bg-white/5">
                     <div className="flex items-center justify-between mb-3">
-                        <label className="text-sm font-medium text-slate-700 dark:text-slate-300">เลือกเวลา</label>
-                        <Clock size={16} className="text-slate-400" />
+                        <label className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">เลือกเวลา</label>
+                        <Clock size={14} className="text-slate-400" />
                     </div>
                     <div className="flex gap-2">
                         <select
                             value={selectedTime.hours}
                             onChange={(e) => handleTimeSelect(e.target.value, selectedTime.minutes)}
-                            className="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-700 border-0 rounded-lg text-sm"
+                            className="flex-1 px-3 py-2 bg-white/50 dark:bg-white/10 border border-white/40 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/50 appearance-none text-center font-mono"
                         >
                             {hourOptions.map(hour => (
                                 <option key={hour} value={hour}>{hour}</option>
                             ))}
                         </select>
-                        <span className="self-center text-slate-400">:</span>
+                        <span className="self-center text-slate-400 font-bold">:</span>
                         <select
                             value={selectedTime.minutes}
                             onChange={(e) => handleTimeSelect(selectedTime.hours, e.target.value)}
-                            className="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-700 border-0 rounded-lg text-sm"
+                            className="flex-1 px-3 py-2 bg-white/50 dark:bg-white/10 border border-white/40 dark:border-white/10 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brand-400/50 appearance-none text-center font-mono"
                         >
                             {minuteOptions.map(minute => (
                                 <option key={minute} value={minute}>{minute}</option>
@@ -398,7 +405,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
             )}
 
             {/* Footer */}
-            <div className="flex items-center justify-between px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border-t border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between px-4 py-3 bg-white/40 dark:bg-white/5 border-t border-white/20">
                 <button
                     type="button"
                     onClick={() => {
@@ -409,7 +416,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
                         }
                     }}
                     disabled={isDateDisabled(new Date().toISOString().split('T')[0])}
-                    className="text-sm font-medium text-white dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 disabled:text-slate-400 disabled:cursor-not-allowed"
+                    className="text-xs font-bold text-brand-600 dark:text-brand-400 hover:text-brand-700 uppercase tracking-wider disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
                     วันนี้
                 </button>
@@ -417,20 +424,20 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 <div className="flex gap-2">
                     {value && (
                         <button
-                        type="button"
-                        onClick={() => {
-                            onChange('');
-                            setIsOpen(false);
-                        }}
-                        className="px-3 py-1.5 text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                            type="button"
+                            onClick={() => {
+                                onChange('');
+                                setIsOpen(false);
+                            }}
+                            className="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 uppercase tracking-wider transition-colors"
                         >
-                        ล้าง
+                            ล้าง
                         </button>
                     )}
                     <button
                         type="button"
                         onClick={() => setIsOpen(false)}
-                        className="px-3 py-1.5 text-sm bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-300 dark:hover:bg-slate-600"
+                        className="px-4 py-1.5 text-xs font-bold bg-white/60 text-slate-500 hover:text-slate-300 rounded-lg border border-white/40 hover:bg-white/80 uppercase tracking-wider transition-all"
                     >
                         ปิด
                     </button>
@@ -442,7 +449,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     return (
         <div className={cn('relative', className)}>
             {label && (
-                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+                <label className="block text-sm font-semibold text-slate-700 mb-2 px-1">
                     {label}
                 </label>
             )}
@@ -454,26 +461,40 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 onClick={() => !disabled && setIsOpen(!isOpen)}
                 disabled={disabled}
                 className={cn(
-                    'w-full px-4 py-2.5 bg-slate-50 border rounded-xl text-sm text-left',
-                    'transition-colors flex items-center justify-between gap-2', inputCss,
-                    error ? 'border-red-300 dark:border-red-500' : 'border-slate-200 dark:border-slate-700',
+                    'input-field flex items-center justify-between gap-2 text-left transition-all',
+                    inputCss,
+                    isOpen && 'ring-2 ring-brand-400/50 border-brand-400/50 bg-white/70',
+                    error ? 'border-rose-300 dark:border-rose-500/50 bg-rose-50/30' : '',
                     disabled && 'opacity-60 cursor-not-allowed'
                 )}
             >
-                <span className={value ? 'text-slate-900 ' : 'text-slate-400'}>
-                    {value ? formatThaiDateShort(value) : placeholder}
-                </span>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 overflow-hidden">
+                    <Calendar size={18} className={cn(
+                        'shrink-0',
+                        value ? 'text-brand-500' : 'text-slate-400'
+                    )} />
+                    <span className={cn(
+                        'truncate',
+                        value ? 'text-slate-800 font-medium' : 'text-slate-400'
+                    )}>
+                        {value ? formatThaiDateShort(value) : placeholder}
+                    </span>
+                </div>
+                
+                <div className="flex items-center gap-2 shrink-0">
                     {showAge && value && (
-                        <span className="text-xs text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">
+                        <span className="badge bg-brand-50/50 text-brand-600 border-brand-200/50">
                             {calculateAge(value)}
                         </span>
                     )}
-                    <Calendar size={16} className="text-slate-400" />
+                    <ChevronRight size={16} className={cn(
+                        'text-slate-400 transition-transform duration-200',
+                        isOpen && 'rotate-90 text-brand-500'
+                    )} />
                 </div>
             </button>
             
-            {error && <ErrorMessage message={error} className='mt-1' />}
+            {error && <ErrorMessage message={error} className='mt-1.5 px-1' />}
 
             {/* Portal Dropdown */}
             {mounted && isOpen && createPortal(dropdownContent, document.body)}

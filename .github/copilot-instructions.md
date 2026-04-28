@@ -46,11 +46,27 @@ This is a Next.js 16 consulting tracking dashboard for managing school consultat
 - Cascading deletes: `onDelete: Cascade`
 - Relationships: `<entity>_id` foreign keys, unique constraints per parent
 
-### Styling
-- Custom Tailwind utilities: `@utility card`, `@utility btn-primary`, etc.
-- Color system: Brand (sky blue), accent (orange), status (emerald/amber/rose)
-- Typography: Prompt for headings, IBM Plex Sans Thai for body, IBM Plex Mono for numbers
-- Responsive: Mobile-first, `hidden lg:flex` for desktop-only
+### Styling - Modern Glassmorphism Design
+- **Design Language**: Glassmorphism with soft backgrounds, backdrop blurs, and subtle borders
+- **Glass Effects**: Use `backdrop-blur-xl`, `bg-white/10` for semi-transparent glass panels with `border-white/20`
+- **Color Palette**:
+  - **Primary (Brand)**: Sky Blue (`#0ea5e9`, `sky-500`) for primary actions and active states
+  - **Secondary (Accent)**: Orange (`#f97316`, `orange-500`) for highlights and secondary actions
+  - **Background Gradient**: Linear gradient from `#f0f9ff` → `#e0f2fe` → `#fdf4ff` for depth
+  - **Semantic Colors**: Emerald (Success/High Rate), Amber (Warning/Medium Rate), Rose (Danger/Low Rate)
+- **Custom Tailwind Utilities**: `@utility glass`, `@utility stat-card`, `@utility btn-primary`, etc.
+- **Typography**:
+  - **Display/Headings**: `Prompt` font for primary UI components
+  - **Body Content**: `IBM Plex Sans Thai` for readability
+  - **Numbers/Data**: `IBM Plex Mono` for statistics and numerical displays
+- **Components**:
+  - **Glass Sidebar**: Semi-transparent with `backdrop-blur-xl` and smooth active state transitions
+  - **Stat Cards**: Custom glass styling with hover shadow effects and smooth animations
+  - **Interactive Tables**: Expandable rows with glass backgrounds and fade animations
+  - **Progress Bars**: Glass-themed bars with status-based color-coding
+  - **Animations**: Custom `fadeInUp` and `countUp` animations for visual feedback
+- **Responsive Design**: Mobile-first approach with `hidden lg:flex` for desktop-only elements
+- **Depth & Shadow**: Layered shadows (`shadow-sm`, `shadow-lg`) to create visual depth with glass effect
 
 ## Project-Specific Patterns
 - **Location Levels**: Computed from ID presence (1=province, 2=district, 3=school)

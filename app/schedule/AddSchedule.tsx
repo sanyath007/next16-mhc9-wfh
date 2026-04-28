@@ -97,6 +97,7 @@ const AddSchedule = ({ onSuccess }: { onSuccess: () => void }) => {
                                         onChange={(date) => {
                                             setSelectedDate(date);
                                         }}
+                                        inputCss='border-slate-200 hover:border-slate-300 hover:shadow-sm'
                                     />
                                 </div>
                             </FormField>
@@ -109,6 +110,7 @@ const AddSchedule = ({ onSuccess }: { onSuccess: () => void }) => {
                                             console.log(value);
                                             setSelectedEmployee(value)
                                         }}
+                                        clearable
                                     />
                                 </div>
                             </FormField>

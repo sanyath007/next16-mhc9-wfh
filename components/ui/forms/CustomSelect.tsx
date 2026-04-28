@@ -389,13 +389,13 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
   // Theme styles
   const themeStyles = {
     primary: {
-      ring: 'ring-primary-500/30',
-      border: 'border-primary-500',
-      selected: 'bg-primary-50 dark:bg-primary-500/15 text-primary-700 dark:text-primary-300',
-      hover: 'hover:bg-primary-50/50 dark:hover:bg-primary-500/10',
-      highlighted: 'bg-primary-100/70 dark:bg-primary-500/20',
-      check: 'text-primary-500',
-      indicator: 'bg-primary-500',
+      ring: 'ring-brand-500/30',
+      border: 'border-brand-500',
+      selected: 'bg-brand-50 dark:bg-brand-500/15 text-brand-700 dark:text-brand-600',
+      hover: 'hover:bg-brand-50/50 dark:hover:bg-brand-500/10',
+      highlighted: 'bg-brand-100/70 dark:bg-brand-500/20',
+      check: 'text-brand-600',
+      indicator: 'bg-brand-500',
     },
     gray: {
       ring: 'ring-slate-400/30',
@@ -637,7 +637,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
     <div className={cn(`relative ${isOpen && showBackdrop ? 'z-9999' : ''}`, className)} ref={containerRef}>
       {/* Label */}
       {label && (
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
+        <label className="block text-sm font-medium text-slate-700 mb-1.5">
           {label}
         </label>
       )}
@@ -652,19 +652,15 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
           ${sizes.container}
           border transition-all duration-200 cursor-pointer
           ${isOpen && showBackdrop ? 'invisible' : ''}
-          ${disabled || loading
-            ? 'opacity-50 cursor-not-allowed bg-slate-100 dark:bg-slate-800'
-            : ''
-          }
+          ${disabled || loading ? 'opacity-50 cursor-not-allowed bg-slate-100' : ''}
           ${error
-            ? 'border-red-300 dark:border-red-500/50 bg-red-50/30 dark:bg-red-500/5'
+            ? 'border-red-300 dark:border-red-500/50 bg-red-50/30'
             : isOpen
-              ? `ring-1 ${colors.ring} ${colors.border} bg-white shadow-lg`
-              : 'border-slate-200 dark:border-slate-700 bg-white hover:border-slate-300 dark:hover:border-slate-600 hover:shadow-sm'
+              ? `ring-2 ${colors.ring} ${colors.border} bg-white shadow-lg`
+              : 'bg-white border-slate-200 hover:border-slate-300 hover:shadow-sm'
           }
         `}
       >
-        {/*  isOpen=dark:bg-slate-800 */}
         {/* Search Icon (when typing) */}
         {typeToSearch && isTyping && (
           <Search size={16} className="shrink-0 text-slate-400 dark:text-slate-500" />
@@ -685,7 +681,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
               flex-1 min-w-0 bg-transparent outline-none
               ${sizes.input}
               ${displayValue && !isTyping && !isOpen
-                ? 'text-slate-900 dark:text-slate-500'
+                ? 'text-slate-900 dark:text-slate-800'
                 : 'text-slate-900 dark:text-slate-500 placeholder:text-slate-400 dark:placeholder:text-slate-500'
               }
               ${disabled || loading ? 'cursor-not-allowed' : 'cursor-text'}
@@ -711,7 +707,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
             <button
               type="button"
               onClick={handleClear}
-              className="p-1 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
+              className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
             >
               <X size={14} />
             </button>
@@ -719,7 +715,7 @@ const CustomSelect: React.FC<CustomSelectProps> = ({
 
           {/* Chevron */}
           {!loading && (
-            <span className={`text-slate-400 dark:text-slate-500 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
+            <span className={`text-slate-400 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}>
               <ChevronDown size={sizes.icon} />
             </span>
           )}
