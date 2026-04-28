@@ -43,6 +43,7 @@ const AddSchedule = ({ onSuccess }: { onSuccess: () => void }) => {
 
             const data = await response.json()
             onSuccess()
+            setShowModal(true)
         } catch (error) {
             
         }

@@ -1,3 +1,6 @@
+"use client"
+
+import { useState } from "react";
 import { DAY_NAMES, MONTH_TH_NAMES } from "@/lib/constants/date-time";
 import {
     getDaysInMonth,
@@ -5,6 +8,7 @@ import {
     sameDay,
     startOfDay
 } from "@/lib/utils/date-time";
+import { cn } from "@/lib/utils/tailwindcss";
 
 type CalendarProps = {
     year: number,
@@ -13,11 +17,7 @@ type CalendarProps = {
     showNext: boolean,
     onPrev: () => void,
     onNext: () => void,
-    startDate: Date | null,
-    endDate: Date | null,
-    hoverDate: Date | null,
-    onDayClick: (date: Date) => void,
-    onDayHover: (date: Date | null) => void,
+    onDayClick: (date: Date) => void
 };
 
 export default function Calendar({
@@ -27,21 +27,18 @@ export default function Calendar({
     showNext,
     onPrev,
     onNext,
-    startDate,
-    endDate,
-    hoverDate,
-    onDayClick,
-    onDayHover
+    onDayClick
 }: CalendarProps) {
     const today     = startOfDay(new Date());
     const totalDays = getDaysInMonth(year, month);
     const firstDay  = getFirstDayOfMonth(year, month);
-    const rangeEnd  = endDate || hoverDate;
 
     const cells = [
         ...Array(firstDay).fill(null),
         ...Array.from({ length: totalDays }, (_, i) => new Date(year, month, i + 1)),
     ];
+
+    const [selectedDate, setSelectedDate] = useState(new Date())
 
     return (
         <div className="flex-1 p-4 min-w-0">
@@ -74,31 +71,26 @@ export default function Calendar({
                 {cells.map((date, i) => {
                     if (!date) return <div key={`e${i}`} />;
 
-                    const d0         = startOfDay(date);
-                    const isToday    = sameDay(d0, today);
-                    const lo         = startDate && rangeEnd ? (startDate <= rangeEnd ? startDate : rangeEnd) : null;
-                    const hi         = startDate && rangeEnd ? (startDate <= rangeEnd ? rangeEnd : startDate) : null;
-                    const inRange    = lo && hi && d0 > lo && d0 < hi;
-                    const isStart    = lo && sameDay(d0, lo);
-                    const isEnd      = hi && sameDay(d0, hi) && !sameDay(lo, hi);
+                    const d0 = startOfDay(date);
+                    const isToday = sameDay(d0, today);
 
                     return (
                         <button
                             key={i}
-                            onClick={() => onDayClick(d0)}
-                            onMouseEnter={() => onDayHover(d0)}
-                            className={[
-                                "flex items-center justify-center transition-all select-none aspect-square w-full h-25 text-sm relative border border-slate-200",
-                                // range coloring
-                                inRange  ? "bg-brand-300 text-white rounded-none"   : "",
-                                isStart  ? "bg-brand-600 text-white font-medium " + (hi && !sameDay(lo, hi) ? "rounded-l-lg rounded-r-none" : "rounded-lg") : "",
-                                isEnd    ? "bg-brand-600 text-white font-medium rounded-r-lg rounded-l-none" : "",
-                                !isStart && !isEnd && !inRange ? "rounded-lg" : "",
-                                // default states
-                                !isStart && !isEnd && !inRange ? (isToday ? "text-brand-400" : "text-slate-600 hover:bg-white/60 hover:text-slate-900") : "",
-                            ].join(" ")}
+                            onClick={() => {
+                                onDayClick(d0)
+                                setSelectedDate(d0)
+                            }}
+                            className={cn(
+                                "glass flex items-center justify-center transition-all select-none aspect-square w-full h-25 text-sm relative border border-slate-200 rounded-lg",
+                                isToday ? "text-brand-400" : "text-slate-600 hover:bg-white/60 hover:text-slate-900",
+                                selectedDate.getDate() === d0.getDate() ? "bg-brand-400/20" : ""
+                            )}
                         >
-                            <span className={["relative", isToday && !isStart && !isEnd ? "after:absolute after:bottom-[-4px] after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-brand-500" : ""].join(" ")}>
+                            <span className={cn(
+                                "relative",
+                                isToday ? "after:absolute after:bottom-[-4px] after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-brand-500" : ""
+                            )}>
                                 {date.getDate()}
                             </span>
                         </button>

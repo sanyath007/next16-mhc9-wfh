@@ -1,25 +1,19 @@
 "use client"
 
 import { useCallback, useEffect, useState } from "react";
-import { useSession } from "next-auth/react";
+import moment from "moment";
 import Calendar from "@/components/ui/CalendarEvent";
 import WorkingList from "./WorkingList";
 import AddSchedule from "./AddSchedule";
-import moment from "moment";
+import { formatThaiDate, toLongTHDate } from "@/lib/utils/date-time";
 
 export default function SchedulePage() {
     const today = new Date();
-    const { data: session } = useSession()
-
-    // draft dates inside the open panel
-    const initMonth = today.getMonth() === 0 ? 0 : today.getMonth() - 1;
-    const [tempStart, setTempStart] = useState<Date | null>(null);
-    const [tempEnd,   setTempEnd]   = useState<Date | null>(null);
-    const [hoverDate, setHoverDate] = useState<Date | null>(null);
-
+    const initMonth = today.getMonth() === 0 ? 0 : today.getMonth();
     const [currentMonth, setCurrentMonth] = useState(initMonth);
     const [currentYear,  setCurrentYear]  = useState(today.getFullYear());
     const [schedules, setSchedules] = useState<any[]>([])
+    const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'))
 
     const prevMonth = () => {
         if (currentMonth === 0) {
@@ -58,8 +52,8 @@ export default function SchedulePage() {
     }, [])
 
     useEffect(() => {
-        fetchSchedules(moment().format('YYYY-MM-DD'))
-    }, [])
+        fetchSchedules(selectedDate)
+    }, [selectedDate])
 
     return (
         <div className="space-y-8">
@@ -69,13 +63,13 @@ export default function SchedulePage() {
                     <h1 className="font-display text-3xl font-bold text-slate-900">ตารางงาน</h1>
                     <p className="text-sm text-slate-500 mt-1">ตารางการปฏิบัติงาน Work from Home ประจำวัน</p>
                 </div>
-                <AddSchedule onSuccess={() => fetchSchedules(moment().format('YYYY-MM-DD'))} />
+                <AddSchedule onSuccess={() => fetchSchedules(selectedDate)} />
             </div>
 
             {/* Section Header */}
             <div>
                 <div className="px-3 py-3 flex flex-col items-start justify-between">
-                    <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home</h3>
+                    <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home ประจำวันที่ {formatThaiDate(selectedDate)}</h3>
                     <span className="text-sm text-slate-400">แสดงรายชื่อของพนักงานในแต่ละวัน</span>
                 </div>
                 <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -97,11 +91,7 @@ export default function SchedulePage() {
                         showNext
                         onPrev={prevMonth}
                         onNext={nextMonth}
-                        startDate={tempStart}
-                        endDate={tempEnd}
-                        hoverDate={hoverDate}
-                        onDayClick={() => console.log('Day clicked')}
-                        onDayHover={d => { if (!tempEnd) setHoverDate(d); }}
+                        onDayClick={(date) => setSelectedDate(moment(date).format('YYYY-MM-DD'))}
                     />
                 </div>
             </div>
