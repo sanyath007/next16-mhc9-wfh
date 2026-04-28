@@ -38,14 +38,21 @@ export async function POST(req: NextRequest) {
     }
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
     const session = await auth()
+
+    /** Get query params */
+    const searchParams = req.nextUrl.searchParams
+    const date = searchParams.get("date")
 
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const schedules = await prisma.schedule.findMany({
+        where: {
+            work_date: new Date(date!)
+        },
         take: 20,
     })
 

@@ -4,9 +4,8 @@ import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { EmployeeCard } from "@/components/ui";
 
-const WorkingList = () => {
+const WorkingList = ({ schedules }: { schedules: any[] }) => {
     const { data: session } = useSession()
-    const [schedules, setSchedules] = useState<any[]>([])
     const [employees, setEmployees] = useState<any[]>([])
 
     const fetchEmployees = useCallback(async () => {
@@ -29,31 +28,7 @@ const WorkingList = () => {
             
         }
     } , [schedules])
-    
-    const fetchSchedules = useCallback(async () => {
-        try {
-            const response = await fetch(`/api/schedule`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
 
-            if (!response.ok) {
-                throw new Error('Failed to authenticate');
-            }
-
-            const data = await response.json()
-            setSchedules(data);
-        } catch (error) {
-            
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchSchedules()
-    }, [])
-    
     useEffect(() => {
         if (schedules.length > 0) {
             fetchEmployees()
