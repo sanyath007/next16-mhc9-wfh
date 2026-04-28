@@ -57,16 +57,24 @@ body {
   @apply card p-6 flex flex-col gap-2 transition-all hover:translate-y-[-2px] hover:shadow-lg hover:shadow-brand-500/10;
 }
 
+@utility btn {
+  @apply font-medium px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95 backdrop-blur-sm;
+}
+
 @utility btn-primary {
-  @apply bg-brand-600/90 hover:bg-brand-700 text-white font-medium px-5 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-brand-500/20 hover:shadow-brand-500/30 backdrop-blur-sm;
+  @apply btn bg-brand-500/90 hover:bg-brand-700 text-white shadow-brand-500/20 hover:shadow-brand-500/30 shadow-lg;
 }
 
 @utility btn-secondary {
-  @apply bg-white/50 hover:bg-white/80 text-slate-700 font-medium px-5 py-2.5 rounded-xl border border-white/40 transition-all duration-200 active:scale-95 backdrop-blur-sm shadow-sm;
+  @apply btn bg-white/50 hover:bg-white/80 text-slate-700 border border-white/40 shadow-sm;
 }
 
 @utility btn-error {
-  @apply bg-rose-500/90 hover:bg-white/80 text-slate-700 font-medium px-5 py-2.5 rounded-xl border border-white/40 transition-all duration-200 active:scale-95 backdrop-blur-sm shadow-sm;
+  @apply btn bg-rose-400/90 hover:bg-rose-600 text-white shadow-rose-500/20 hover:shadow-rose-500/30 shadow-lg;
+}
+
+@utility btn-warning {
+  @apply btn bg-accent-400/90 hover:bg-accent-600 text-white shadow-accent-500/20 hover:shadow-accent-500/30 shadow-lg;
 }
 
 @utility input-field {

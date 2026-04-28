@@ -7,7 +7,7 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Calendar from "@/components/ui/CalendarEvent";
-import Modal from "@/components/ui/Modal";
+import Modal from "@/components/ui/modals";
 import FormField from "@/components/ui/forms/FormField";
 import DatePicker from "@/components/ui/forms/DatePicker";
 import CustomSelect from "@/components/ui/forms/CustomSelect";
@@ -113,10 +113,7 @@ export default function SchedulePage() {
                 </div>
                 <button
                     type="button"
-                    className={cn(
-                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
-                        `glass-nav-active bg-slate-300/20 border-slate-300/30 shadow-md`
-                    )}
+                    className={`btn-primary`}
                     onClick={() => setShowModal(true)}
                 >
                     เพิ่มตารางงาน
@@ -153,23 +150,16 @@ export default function SchedulePage() {
                             </FormField>
 
                             <div className="mt-4 flex justify-end gap-2">
-
                                 <button
                                     type="button"
-                                    className={cn(
-                                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
-                                        `btn-secondary`
-                                    )}
+                                    className={'btn-error'}
                                     onClick={() => setShowModal(false)}
                                 >
                                     ยกเลิก
                                 </button>
                                 <button
                                     type="button"
-                                    className={cn(
-                                        `flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-300 cursor-pointer`,
-                                        `glass-nav-active bg-slate-300/20 border-slate-300/30 shadow-md`
-                                    )}
+                                    className={`btn-primary`}
                                     onClick={onSubmit}
                                 >
                                     ตกลง
