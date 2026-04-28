@@ -19,7 +19,7 @@ const FormField: React.FC<FormFieldProps> = ({
     className = '',
 }) => (
     <div className={`space-y-1.5 ${className}`}>
-        <label className="block text-sm font-medium text-slate-700 dark:text-slate-300">
+        <label className="block text-sm font-medium text-slate-700">
             {label}
             {required && <span className="text-red-500 ml-1">*</span>}
         </label>
