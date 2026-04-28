@@ -3,41 +3,15 @@
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
 import { EmployeeCard } from "@/components/ui";
+import { useWorkings } from "@/lib/hooks/useWorking";
 
 const WorkingList = ({ schedules }: { schedules: any[] }) => {
     const { data: session } = useSession()
-    const [employees, setEmployees] = useState<any[]>([])
-
-    const fetchEmployees = useCallback(async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user.access_token}`,
-                },
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to authenticate');
-            }
-
-            const data = await response.json()
-            setEmployees(data.filter((e: any) => schedules.some(s => s.employee_id === e.id)))
-        } catch (error) {
-            
-        }
-    } , [schedules])
-
-    useEffect(() => {
-        if (schedules.length > 0) {
-            fetchEmployees()
-        }
-    }, [schedules])
+    const { data: employees } = useWorkings({ schedules: schedules })
 
     return (
         <>
-            {employees.slice(0, 4).map((e: any, i: number) => (
+            {employees && employees.slice(0, 4).map((e: any, i: number) => (
                 <EmployeeCard
                     key={e.id}
                     employee={{

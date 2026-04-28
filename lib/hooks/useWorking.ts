@@ -1,0 +1,71 @@
+import { useSession } from "next-auth/react"
+import { useCallback, useEffect, useState } from "react"
+
+export function useWorkings ({ schedules }: { schedules: any[] | null }) {
+    const { data: session } = useSession()
+    const [data, setData] = useState<any[] | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const fetchEmployees = useCallback(async () => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${session?.user.access_token}`,
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to authenticate');
+            }
+
+            const data = await response.json()
+            setData(data.filter((e: any) => schedules && schedules.some(s => s.employee_id === e.id)))
+        } catch (error) {
+            
+        }
+    } , [schedules])
+
+    useEffect(() => {
+        if (schedules && schedules.length > 0) {
+            fetchEmployees()
+        }
+    }, [schedules])
+
+    return { data, isLoading, error }
+}
+
+export function useSchedules ({ date }: { date: string }) {
+    const { data: session } = useSession()
+    const [data, setData] = useState<any[] | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const fetchSchedules = useCallback(async (date: string) => {
+        try {
+            const response = await fetch(`/api/schedule?date=${date}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to authenticate');
+            }
+
+            const data = await response.json()
+            setData(data);
+        } catch (error) {
+            
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchSchedules(date)
+    }, [date])
+
+    return { data, isLoading, error }
+}

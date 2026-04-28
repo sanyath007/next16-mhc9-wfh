@@ -21,7 +21,7 @@ export default function SchedulePage() {
             setCurrentYear(y => y - 1);
         }
         else setCurrentMonth(m => m - 1);
-    };
+    }
 
     const nextMonth = () => {
         if (currentMonth === 11) {
@@ -29,7 +29,7 @@ export default function SchedulePage() {
             setCurrentYear(y => y + 1);
         }
         else setCurrentMonth(m => m + 1);
-    };
+    }
 
     const fetchSchedules = useCallback(async (date: string) => {
         try {

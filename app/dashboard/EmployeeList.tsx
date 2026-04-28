@@ -4,36 +4,7 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { NotepadText } from 'lucide-react'
 
-const EmployeeList = ({ department }: { department?: string }) => {
-    const [employees, setEmployees] = useState<any[]>([])
-    const { data: session } = useSession()
-
-    const fetchEmployees = useCallback(async () => {
-        try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${session?.user.access_token}`,
-                },
-            });
-            
-            if (!response.ok) {
-                throw new Error('Failed to authenticate');
-            }
-
-            const data = await response.json()
-            setEmployees(data)
-        } catch (error) {
-            console.error('Error occurred while logging in:', error);
-            throw error;
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchEmployees()
-    }, [])
-
+const EmployeeList = ({ employees }: { employees?: any[] | null }) => {
     return (
         <div className="card overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex flex-col items-start justify-between">
@@ -52,7 +23,7 @@ const EmployeeList = ({ department }: { department?: string }) => {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                        {employees
+                        {employees && employees
                             .filter(e => e.status === 1)
                             .map((employee, i) => (
                             <tr
