@@ -1,63 +1,243 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
-// ===== AUTH =====
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  password      String
-  role          Role      @default(VIEWER)
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-  sessions      Session[]
+  id         String    @id @default(cuid())
+  name       String?
+  email      String    @unique
+  password   String
+  role       Role      @default(VIEWER)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  sessions   Session[]
 
   @@map("users")
 }
 
 model Session {
-  id           String   @id @default(cuid())
+  id            String   @id @default(cuid())
   session_token String   @unique
-  user_id      String
-  expires      DateTime
-  user         User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  user_id       String
+  expires       DateTime
+  user          User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
+  @@index([user_id], map: "sessions_user_id_fkey")
   @@map("sessions")
+}
+
+model Schedule {
+  id          String   @id @default(cuid())
+  work_date   DateTime
+  employee_id Int
+  report_file String
+
+  employee   Employee                   @relation(fields: [employee_id], references: [id], map: "schedule_employee_ibfk_1")
+
+  @@map("schedules")
+}
+
+model DataUpload {
+  id          String   @id @default(cuid())
+  filename    String
+  employee_id Int
+  year        Int
+  work_date   DateTime
+  uploaded_at DateTime @default(now())
+  uploaded_by String
+
+  employee   Employee                   @relation(fields: [employee_id], references: [id], map: "datau_upload_employee_ibfk_1")
+
+  @@map("data_uploads")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model Amphur {
+  id     Int      @id @default(autoincrement())
+  name   String?  @db.VarChar(200)
+  chw_id String?  @db.VarChar(20)
+  amp_id String?  @db.VarChar(20)
+
+  employees         Employee[]
+
+  @@map("amphurs")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model Changwat {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(200)
+  en_name   String? @db.VarChar(200)
+  short     String? @db.VarChar(5)
+  short_en  String? @db.VarChar(5)
+  region_id String? @db.VarChar(20)
+
+  employees         Employee[]
+
+  @@map("changwats")
+}
+
+model Department {
+  id         Int       @id @default(autoincrement())
+  name       String?   @db.VarChar(100)
+  status     Int?
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+
+  divisions   Division[]
+  members     Member[]
+
+  @@map("departments")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Division {
+  id            Int       @id @default(autoincrement())
+  name          String?   @db.VarChar(45)
+  department_id Int
+  has_saraban   Int
+  status        Int?
+  created_at    DateTime? @db.DateTime(0)
+  updated_at    DateTime? @db.DateTime(0)
+
+  department    Department                  @relation(fields: [department_id], references: [id], map: "division_department_ibfk_1")
+  members       Member[]
+  
+  @@map("divisions")
+}
+
+model Duty {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(100)
+  display_name String   @db.VarChar(100)
+  created_at   DateTime @db.DateTime(0)
+  updated_at   DateTime @db.DateTime(0)
+
+  members       Member[]
+  
+  @@map("duties")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Employee {
+  id              Int       @id @default(autoincrement())
+  employee_no     String?   @db.VarChar(100)
+  prefix_id       Int
+  firstname       String    @db.VarChar(100)
+  lastname        String    @db.VarChar(100)
+  cid             String    @db.VarChar(20)
+  birthdate       DateTime? @db.Date
+  sex             Int
+  address_no      String?   @db.VarChar(200)
+  moo             Int?
+  road            String?   @db.VarChar(100)
+  changwat_id     Int?
+  amphur_id       Int?
+  tambon_id       Int?
+  zipcode         Int?
+  tel             String?   @db.VarChar(100)
+  email           String?   @db.VarChar(100)
+  line_id         String?   @db.VarChar(100)
+  position_id     Int
+  position_text   String?   @db.VarChar(100)
+  level_id        Int?
+  assigned_at     DateTime? @db.Date
+  started_at      DateTime? @db.Date
+  face_descriptor Json?
+  avatar_url      String?   @db.Text
+  remark          String?   @db.Text
+  status          Int?
+  created_at      DateTime? @db.DateTime(0)
+  updated_at      DateTime? @db.DateTime(0)
+
+  prefix          Prefix                      @relation(fields: [prefix_id], references: [id], map: "employee_prefix_ibfk_1")
+  position        Position                    @relation(fields: [position_id], references: [id], map: "employee_position_ibfk_1")
+  level           Level?                       @relation(fields: [level_id], references: [id], map: "employee_level_ibfk_1")
+  changwat        Changwat?                    @relation(fields: [changwat_id], references: [id], map: "employee_changwat_ibfk_1")
+  amphur          Amphur?                      @relation(fields: [amphur_id], references: [id], map: "employee_amphur_ibfk_1")
+  tambon          Tambon?                      @relation(fields: [tambon_id], references: [id], map: "employee_tambon_ibfk_1")
+
+  schedules       Schedule[]
+  data_uploads    DataUpload[]
+  members         Member[]
+  
+  @@map("employees")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Level {
+  id               Int       @id @default(autoincrement())
+  name             String?   @db.VarChar(100)
+  position_type_id Int?
+  created_at       DateTime? @db.DateTime(0)
+  updated_at       DateTime? @db.DateTime(0)
+
+  employees         Employee[]
+  
+  @@map("levels")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Member {
+  id            Int       @id @default(autoincrement())
+  employee_id   Int
+  duty_id       Int
+  department_id Int
+  division_id   Int?
+  created_at    DateTime? @db.DateTime(0)
+  updated_at    DateTime? @db.DateTime(0)
+
+  employee      Employee                  @relation(fields: [employee_id], references: [id], map: "member_employee_ibfk_1")
+  duty          Duty                      @relation(fields: [duty_id], references: [id], map: "member_duty_ibfk_1")
+  department    Department                @relation(fields: [department_id], references: [id], map: "member_department_ibfk_1")
+  division      Division?                 @relation(fields: [division_id], references: [id], map: "member_division_ibfk_1")
+  
+  @@map("members")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model Position {
+  id                Int       @id @default(autoincrement())
+  name              String?   @db.VarChar(100)
+  position_type_id  Int?
+  created_at        DateTime? @db.DateTime(0)
+  updated_at        DateTime? @db.DateTime(0)
+
+  employees         Employee[]
+  
+  @@map("positions")
+}
+
+model Prefix {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  created_at DateTime? @db.DateTime(0)
+  updated_at DateTime? @db.DateTime(0)
+
+  employees         Employee[]
+  
+  @@map("prefixes")
+}
+
+model Tambon {
+  id     Int     @id @default(autoincrement())
+  name   String? @db.VarChar(255)
+  chw_id String  @db.VarChar(50)
+  amp_id String  @db.VarChar(50)
+  tam_id String  @db.VarChar(8)
+
+  employees         Employee[]
+
+  @@map("tambons")
 }
 
 enum Role {
   ADMIN
   EDITOR
   VIEWER
-}
-
-// ===== DATA =====
-model Schedule {
-  id          String    @id @default(cuid())
-  work_date   DateTime
-  employee_id Int
-  report_file String    
-
-  @@map("schedules")
-}
-
-model DataUpload {
-  id          String    @id @default(cuid())
-  filename    String
-  uploaded_at DateTime  @default(now())
-  uploaded_by String
-  user_id     Int
-  year        Int
-  work_date   DateTime
-
-  @@map("data_uploads")
 }

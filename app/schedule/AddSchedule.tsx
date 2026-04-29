@@ -51,7 +51,7 @@ const AddSchedule = ({ onSuccess }: { onSuccess: () => void }) => {
 
     const fetchEmployees = useCallback(async () => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
+            const response = await fetch(`/api/employee`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',

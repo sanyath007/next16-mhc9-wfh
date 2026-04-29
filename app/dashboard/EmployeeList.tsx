@@ -43,7 +43,7 @@ const EmployeeList = ({ employees }: { employees?: any[] | null }) => {
                                     {employee.position?.name}{employee.level ? employee.level?.name : ''}
                                 </td>
                                 <td className="px-5 py-4 text-sm text-slate-600">
-                                    {employee.member_of[0]?.department?.name}
+                                    {employee.members[0]?.department?.name}
                                 </td>
                                 <td className="px-5 py-4 text-center">
                                     {/* <ProgressBar value={p.studentCompleted} max={p.studentRequested} /> */}

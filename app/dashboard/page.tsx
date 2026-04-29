@@ -36,7 +36,7 @@ export default function DashboardPage() {
     useEffect(() => {
         if (schedules && schedules?.length > 0) {
             // console.log(schedules);
-            // console.log(workings);
+            console.log(workings);
         }
     }, [schedules])
 

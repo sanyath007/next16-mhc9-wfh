@@ -9,7 +9,7 @@ export function useWorkings ({ schedules }: { schedules: any[] | null }) {
 
     const fetchEmployees = useCallback(async (schedules: any[] | null) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
+            const response = await fetch(`/api/employee`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
