@@ -7,7 +7,7 @@ export function useWorkings ({ schedules }: { schedules: any[] | null }) {
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchEmployees = useCallback(async () => {
+    const fetchEmployees = useCallback(async (schedules: any[] | null) => {
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employees`, {
                 method: 'GET',
@@ -26,24 +26,24 @@ export function useWorkings ({ schedules }: { schedules: any[] | null }) {
         } catch (error) {
             
         }
-    } , [schedules])
+    } , [])
 
     useEffect(() => {
         if (schedules && schedules.length > 0) {
-            fetchEmployees()
+            fetchEmployees(schedules)
         }
     }, [schedules])
 
     return { data, isLoading, error }
 }
 
-export function useSchedules ({ date, dep }: { date: string, dep?: string }) {
+export function useSchedules ({ date, dep }: { date: string, dep: string }) {
     const { data: session } = useSession()
     const [data, setData] = useState<any[] | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchSchedules = useCallback(async (date: string, dep: string = '') => {
+    const fetchSchedules = useCallback(async (date: string, dep: string) => {
         try {
             const response = await fetch(`/api/schedule?date=${date}&dep=${dep}`, {
                 method: 'GET',
@@ -64,7 +64,7 @@ export function useSchedules ({ date, dep }: { date: string, dep?: string }) {
     }, [])
 
     useEffect(() => {
-        fetchSchedules(date)
+        fetchSchedules(date, dep)
     }, [date, dep])
 
     return { data, isLoading, error }

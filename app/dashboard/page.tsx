@@ -27,52 +27,18 @@ interface ApiData {
 
 export default function DashboardPage() {
     const [data, setData] = useState<ApiData | null>(null)
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
 
     const { data: schedules } = useSchedules({ date: selectedDate, dep: selectedDep })
-    const { data: workings } = useWorkings({ schedules: schedules })
-
-    const fetchData = useCallback(async () => {
-        setLoading(true)
-
-        try {
-            let url = '/api/data'
-            if (selectedDate !== '') {
-                url += `?year=${selectedDate}`
-            }
-
-            const response  = await fetch(url)
-
-            if (!response.ok) {
-                setError('Failed to authenticate');
-                return;
-            }
-
-            const data = await response.json()
-            setData(data)
-
-            // sync selectedYear from server if not explicitly set
-            if (selectedDate === '' && data.selectedDate) {
-                setSelectedDate(data.selectedYear)
-            }
-        } catch (e) {
-            console.error(e)
-        } finally {
-            setLoading(false)
-        }
-    }, [selectedDate])
+    const { data: workings, isLoading } = useWorkings({ schedules: schedules })
 
     useEffect(() => {
-        fetchData()
-    }, [fetchData])
-
-    // clear province filter when year changes so UI matches the dataset
-    // useEffect(() => {
-    //     setSelectedDep('')
-    // }, [selectedDate])
+        if (schedules && schedules?.length > 0) {
+            // console.log(schedules);
+            // console.log(workings);
+        }
+    }, [schedules])
 
     // ── Derived ────────────────────────────────────────────────────────────────
     const allRecords     = data?.records ?? []
@@ -117,7 +83,7 @@ export default function DashboardPage() {
     }, [selectedDep, provinceStats, allRecords])
 
     // ── Loading / empty states ──────────────────────────────────────────────────
-    if (loading) return (
+    if (isLoading) return (
         <div className="flex items-center justify-center h-64">
             <div className="flex flex-col items-center gap-3">
                 <div className="w-10 h-10 border-2 border-brand-400 border-t-transparent rounded-full animate-spin" />
@@ -151,7 +117,7 @@ export default function DashboardPage() {
                         />
                     </div>
 
-                    <button onClick={fetchData} className="btn-secondary flex items-center gap-2 text-sm">
+                    <button type="button" className="btn-secondary flex items-center gap-2 text-sm">
                         <RefreshCw className="w-4 h-4" />รีเฟรช
                     </button>
                 </div>
@@ -182,7 +148,7 @@ export default function DashboardPage() {
                         return (
                             <div key={dep} className="relative group">
                                 <button
-                                    onClick={() => { console.log(dep); setSelectedDep(dep) }}
+                                    onClick={() => setSelectedDep(dep)}
                                     className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-medium transition-all cursor-pointer ${
                                         active
                                             ? 'bg-brand-600 text-white shadow-sm'
@@ -198,7 +164,7 @@ export default function DashboardPage() {
                                     <div className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2.5 z-30
                                         bg-slate-900 text-white text-xs rounded-xl px-3.5 py-2 whitespace-nowrap
                                         opacity-0 scale-95 group-hover:opacity-100 group-hover:scale-100
-                                        transition-all duration-150 shadow-xl"
+                                        transition-all duration-150 shadow-xl hidden"
                                     >
                                         {/* <p className="font-semibold text-white mb-1.5">{p.province}</p> */}
                                         {/* <div className="space-y-1 text-slate-300">
@@ -266,8 +232,8 @@ export default function DashboardPage() {
                 <div className="card p-6 xl:col-span-2">
                     <h3 className="font-display font-semibold text-slate-800 mb-5">
                         {selectedDep
-                            ? `สถิติรายอำเภอ — จ.${selectedDep} (รายคน)`
-                            : 'สถิติรายจังหวัด (รายคน)'}
+                            ? `สถิติกลุ่มงาน${selectedDep} (รายคน)`
+                            : 'สถิติภาพรวม (รายคน)'}
                     </h3>
                     <ResponsiveContainer width="100%" height={280}>
                         <BarChart data={barData} barGap={4} margin={{ bottom: selectedDep ? 44 : 5 }}>
@@ -282,15 +248,15 @@ export default function DashboardPage() {
                             <YAxis tick={{ fontSize: 11 }} />
                             <Tooltip
                                 contentStyle={{
-                                borderRadius: '12px', border: '1px solid #e2e8f0',
-                                boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
-                                fontFamily: 'IBM Plex Sans Thai', fontSize: 12,
+                                    borderRadius: '12px', border: '1px solid #e2e8f0',
+                                    boxShadow: '0 4px 20px rgba(0,0,0,0.08)',
+                                    fontFamily: 'IBM Plex Sans Thai', fontSize: 12,
                                 }}
                             />
-                            <Legend />
-                            <Bar dataKey="ขอคำปรึกษา"   fill="#bae6fd" radius={[4,4,0,0]} />
+                            {/* <Legend /> */}
+                            <Bar dataKey="ขอคำปรึกษา" fill="#bae6fd" radius={[4,4,0,0]} />
                             <Bar dataKey="ได้รับคำปรึกษา" fill="#38bdf8" radius={[4,4,0,0]} />
-                            <Bar dataKey="สำเร็จ"         fill="#0369a1" radius={[4,4,0,0]} />
+                            <Bar dataKey="สำเร็จ" fill="#0369a1" radius={[4,4,0,0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
@@ -320,9 +286,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Work from home employee table */}
-            {!selectedDep && (
-                <EmployeeList employees={workings} />
-            )}
+            <EmployeeList employees={workings} />
 
         </div>
     )
