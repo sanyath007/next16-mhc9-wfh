@@ -51,7 +51,7 @@ export default function LoginPage() {
               <div className="w-12 h-12 bg-white/20 backdrop-blur-xl rounded-2xl flex items-center justify-center border border-white/20 shadow-lg">
                 <BarChart3 className="w-6 h-6 text-white" />
               </div>
-              <span className="text-white font-display font-bold text-2xl tracking-tight">ConsultTrack</span>
+              <span className="text-white font-display font-bold text-2xl tracking-tight">MHC9 WFH</span>
             </div>
           </div>
 
@@ -61,31 +61,16 @@ export default function LoginPage() {
               <span>Smart Monitoring System</span>
             </div>
             <h1 className="font-display text-4xl font-bold text-white leading-tight mb-6">
-              ยกระดับคุณภาพ<br />การให้คำปรึกษา
+              พัฒนาสู่การเป็น<br />องค์การดิจิทัล
             </h1>
-            <p className="text-brand-50/80 text-lg leading-relaxed mb-8">
+            {/* <p className="text-brand-50/80 text-base leading-relaxed mb-8">
               ระบบวิเคราะห์ข้อมูลเชิงลึกสำหรับงานแนะแนว<br />
               เพื่อประสิทธิภาพสูงสุดในการดูแลนักเรียน
-            </p>
-            
-            <div className="grid grid-cols-1 gap-4">
-              {[
-                { val: '77 จังหวัด', label: 'ครอบคลุมทั่วประเทศ' },
-                { val: 'Real-time', label: 'วิเคราะห์ผลทันที' },
-              ].map((item) => (
-                <div key={item.val} className="flex items-center gap-4 bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/10 hover:bg-white/10 transition-colors">
-                  <div className="w-2 h-10 bg-brand-400 rounded-full" />
-                  <div>
-                    <div className="text-white font-display font-bold text-xl">{item.val}</div>
-                    <div className="text-brand-100/70 text-sm">{item.label}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            </p> */}
           </div>
 
           <div className="relative z-10 text-white/40 text-xs font-medium tracking-widest uppercase">
-            © 2024 Management Portal
+            © 2024 MHC9
           </div>
         </div>
 
