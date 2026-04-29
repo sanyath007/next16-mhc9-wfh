@@ -1,4 +1,5 @@
 'use client'
+
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import {
     Users, GraduationCap, MapPin, CheckCircle2, RefreshCw,
@@ -35,10 +36,10 @@ export default function DashboardPage() {
 
     useEffect(() => {
         if (schedules && schedules?.length > 0) {
-            // console.log(schedules);
+            console.log(schedules);
             console.log(workings);
         }
-    }, [schedules])
+    }, [schedules, workings])
 
     // ── Derived ────────────────────────────────────────────────────────────────
     const allRecords     = data?.records ?? []
