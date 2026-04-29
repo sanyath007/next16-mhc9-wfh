@@ -3,13 +3,13 @@
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
 
-export function useEmployees ({ schedules }: { schedules: any[] | null }) {
+export function useEmployees () {
     const { data: session } = useSession()
     const [data, setData] = useState<any[] | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchEmployees = useCallback(async (schedules: any[] | null) => {
+    const fetchEmployees = useCallback(async () => {
         try {
             const response = await fetch(`/api/employee`, {
                 method: 'GET',
@@ -31,10 +31,8 @@ export function useEmployees ({ schedules }: { schedules: any[] | null }) {
     } , [])
 
     useEffect(() => {
-        if (schedules && schedules.length > 0) {
-            fetchEmployees(schedules)
-        }
-    }, [schedules])
+        fetchEmployees()
+    }, [fetchEmployees])
 
     return { data, isLoading, error }
 }

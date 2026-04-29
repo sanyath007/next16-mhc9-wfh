@@ -1,9 +1,10 @@
 'use client'
 
-import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
     Users, GraduationCap, MapPin, CheckCircle2, RefreshCw,
     Building2, ChevronDown, ChevronRight, ArrowLeft,
+    House,
 } from 'lucide-react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
@@ -15,7 +16,7 @@ import { PIE_COLORS } from '@/lib/constants/dashboard'
 import EmployeeList from './EmployeeList'
 import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
-import { useSchedules, useWorkings } from '@/lib/hooks/useWorking'
+import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 interface ApiData {
@@ -33,55 +34,70 @@ export default function DashboardPage() {
 
     const { data: schedules } = useSchedules({ date: selectedDate, dep: selectedDep })
     const { data: workings, isLoading } = useWorkings({ schedules: schedules })
+    const { data: employees } = useEmployees()
 
     useEffect(() => {
-        if (schedules && schedules?.length > 0) {
-            console.log(schedules);
-            console.log(workings);
+        if (workings && workings?.length > 0) {
+            generateData()
         }
-    }, [schedules, workings])
+    }, [workings])
 
-    // ── Derived ────────────────────────────────────────────────────────────────
-    const allRecords     = data?.records ?? []
-    const provinceStats  = data?.summary?.provinceStats ?? []
-    const summary        = data?.summary
+    const generateData = () => {
+        console.log(employees, workings);
 
-    const provinceRecords = useMemo(() => selectedDep ? allRecords.filter(r => r.province === selectedDep) : [], [allRecords, selectedDep])
-    const selectedProv = selectedDep ? provinceStats.find(p => p.province === selectedDep) : null
+        const normals = employees?.filter(e => !workings?.some(w => w.id === e.id))
+        console.log(normals);
+    }
 
-    const kpi = selectedProv 
-                ? {
-                    totalStudentsRequested: selectedProv.studentRequested,
-                    totalStudentsReceived:  selectedProv.studentReceived,
-                    totalStudentsCompleted: selectedProv.studentCompleted,
-                    overallCompletionRate:  selectedProv.completionRate,
-                } : summary
+    // const provinceRecords = useMemo(() => selectedDep ? allRecords.filter(r => r.province === selectedDep) : [], [allRecords, selectedDep])
+
+    const stat = {
+        normal: employees?.filter(e => !workings?.some(w => w.id === e.id)).length,
+        wfh: workings?.length,
+        leaved: 2,
+        tripped: 4,
+        total: employees?.length,
+    }
 
     const pieData = [
-        { name: 'สำเร็จแล้ว',          value: kpi?.totalStudentsCompleted ?? 0 },
-        { name: 'อยู่ระหว่างดำเนินการ', value: (kpi?.totalStudentsReceived ?? 0) - (kpi?.totalStudentsCompleted ?? 0) },
-        { name: 'ยังไม่ได้รับ',         value: (kpi?.totalStudentsRequested ?? 0) - (kpi?.totalStudentsReceived ?? 0) },
+        { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)) },
+        { name: 'WFH', value: stat?.wfh ?? 0 },
+        { name: 'ลา/ไปราชการ', value: (stat?.leaved ?? 0) + (stat?.tripped ?? 0) },
     ].filter(d => d.value > 0)
 
     const barData = useMemo(() => {
         if (!selectedDep) {
-            return provinceStats.map(p => ({
-                name: p.province,
-                ขอคำปรึกษา:   p.studentRequested,
-                ได้รับคำปรึกษา: p.studentReceived,
-                สำเร็จ:       p.studentCompleted,
-            }))
+            return [
+                {
+                    name: 'อำนวยการ',
+                    "สำนักงาน": 6,
+                    "WFH": 2,
+                    "ลา/ไปราชการ": 1
+                },
+                {
+                    name: 'วิชาการสุขภาพจิต',
+                    "สำนักงาน": 5,
+                    "WFH": 1,
+                    "ลา/ไปราชการ": 1
+                },
+                {
+                    name: 'วิชาการสุขภาพจิต',
+                    "สำนักงาน": 2,
+                    "WFH": 1,
+                    "ลา/ไปราชการ": 1
+                }
+            ]
         }
 
-        return allRecords
-        .filter(r => r.province === selectedDep && r.level === 2)
-        .map(r => ({
-            name: r.district ?? '',
-            ขอคำปรึกษา:   r.studentRequestedPerson,
-            ได้รับคำปรึกษา: r.studentReceivedPerson,
-            สำเร็จ:       r.studentCompletedPerson,
-        }))
-    }, [selectedDep, provinceStats, allRecords])
+        return [
+            {
+                name: selectedDep,
+                "สำนักงาน": 9,
+                "WFH": 1,
+                "ลา/ไปราชการ": 0
+            },
+        ]
+    }, [selectedDep])
 
     // ── Loading / empty states ──────────────────────────────────────────────────
     if (isLoading) return (
@@ -205,27 +221,10 @@ export default function DashboardPage() {
 
             {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                {/* {!selectedProvince ? (
-                <>
-                    <StatCard icon={MapPin}        label="จังหวัด"     value={summary.totalProvinces}   color="brand"   delay={0} />
-                    <StatCard icon={Building2}     label="อำเภอ"       value={summary.totalDistricts}   color="brand"   delay={50} />
-                    <StatCard icon={GraduationCap} label="โรงเรียน"   value={summary.totalSchools}      color="emerald" delay={100} />
-                    <StatCard icon={Users}         label="Consultants" value={summary.totalConsultants} color="amber"   delay={150} />
-                </>
-                ) : (
-                <>
-                    <StatCard icon={Building2}     label="อำเภอ"       value={selectedProv?.districtCount ?? 0}  color="brand"   delay={0} />
-                    <StatCard icon={GraduationCap} label="โรงเรียน"   value={selectedProv?.schoolCount ?? 0}     color="emerald" delay={50} />
-                    <StatCard icon={Users}         label="Consultants" value={selectedProv?.consultants ?? 0}    color="amber"   delay={100} />
-                    <StatCard
-                    icon={CheckCircle2}
-                    label="อัตราสำเร็จ"
-                    value={`${selectedProv?.completionRate ?? 0}%`}
-                    color={(selectedProv?.completionRate ?? 0) >= 70 ? 'emerald' : (selectedProv?.completionRate ?? 0) >= 40 ? 'amber' : 'rose'}
-                    delay={150}
-                    />
-                </>
-                )} */}
+                <StatCard icon={Users} label="บุคลากรทั้งหมด" value={stat.total!} color="indigo"   delay={0} />
+                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal! - (stat.leaved! + stat.tripped!)} color="brand"   delay={50} />
+                <StatCard icon={House} label="Work from Home" value={stat.wfh!} color="rose" delay={100} />
+                <StatCard icon={MapPin} label="ลา/ไปราชการ" value={stat.leaved! + stat.tripped!} color="emerald"   delay={150} />
             </div>
 
             {/* Charts */}
@@ -237,12 +236,12 @@ export default function DashboardPage() {
                             : 'สถิติภาพรวม (รายคน)'}
                     </h3>
                     <ResponsiveContainer width="100%" height={280}>
-                        <BarChart data={barData} barGap={4} margin={{ bottom: selectedDep ? 44 : 5 }}>
+                        <BarChart data={barData} barGap={2} margin={{ bottom: 5 }}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                             <XAxis
                                 dataKey="name"
                                 tick={{ fontSize: 11 }}
-                                angle={selectedDep ? -30 : 0}
+                                angle={0}
                                 textAnchor={selectedDep ? 'end' : 'middle'}
                                 interval={0}
                             />
@@ -254,10 +253,10 @@ export default function DashboardPage() {
                                     fontFamily: 'IBM Plex Sans Thai', fontSize: 12,
                                 }}
                             />
-                            {/* <Legend /> */}
-                            <Bar dataKey="ขอคำปรึกษา" fill="#bae6fd" radius={[4,4,0,0]} />
-                            <Bar dataKey="ได้รับคำปรึกษา" fill="#38bdf8" radius={[4,4,0,0]} />
-                            <Bar dataKey="สำเร็จ" fill="#0369a1" radius={[4,4,0,0]} />
+                            <Legend />
+                            <Bar dataKey="สำนักงาน" fill="#3C9EDB" radius={[4,4,0,0]} />
+                            <Bar dataKey="WFH" fill="#f43f5e" radius={[4,4,0,0]} />
+                            <Bar dataKey="ลา/ไปราชการ" fill="#5bcf8f" radius={[4,4,0,0]} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>

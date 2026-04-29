@@ -17,6 +17,7 @@ export function StatCard({
         emerald: 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20',
         amber:   'bg-amber-500/10 text-amber-600 border border-amber-500/20',
         rose:    'bg-rose-500/10 text-rose-600 border border-rose-500/20',
+        indigo:  'bg-indigo-500/10 text-indigo-600 border border-indigo-500/20',
     }
 
     return (
