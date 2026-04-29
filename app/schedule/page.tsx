@@ -5,7 +5,7 @@ import moment from "moment";
 import Calendar from "@/components/ui/CalendarEvent";
 import WorkingList from "./WorkingList";
 import AddSchedule from "./AddSchedule";
-import { formatThaiDate, toLongTHDate } from "@/lib/utils/date-time";
+import { formatThaiDate } from "@/lib/utils/date-time";
 
 export default function SchedulePage() {
     const today = new Date();
@@ -91,7 +91,10 @@ export default function SchedulePage() {
                         showNext
                         onPrev={prevMonth}
                         onNext={nextMonth}
-                        onDayClick={(date) => setSelectedDate(moment(date).format('YYYY-MM-DD'))}
+                        onDayClick={(date) => {
+                            setSelectedDate(moment(date).format('YYYY-MM-DD'))
+                            setSchedules([])
+                        }}
                     />
                 </div>
             </div>

@@ -37,15 +37,15 @@ export function useEmployees () {
     return { data, isLoading, error }
 }
 
-export function useWorkings ({ schedules }: { schedules: any[] | null }) {
+export function useWorkings ({ schedules, dep = '' }: { schedules: any[] | null, dep?: string }) {
     const { data: session } = useSession()
     const [data, setData] = useState<any[] | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchEmployees = useCallback(async (schedules: any[] | null) => {
+    const fetchEmployees = useCallback(async (schedules: any[] | null, dep: string) => {
         try {
-            const response = await fetch(`/api/employee`, {
+            const response = await fetch(`/api/employee?dep=${dep}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -66,22 +66,24 @@ export function useWorkings ({ schedules }: { schedules: any[] | null }) {
 
     useEffect(() => {
         if (schedules && schedules.length > 0) {
-            fetchEmployees(schedules)
+            fetchEmployees(schedules, dep)
+        } else {
+            setData(null)
         }
-    }, [schedules])
+    }, [schedules, dep])
 
     return { data, isLoading, error }
 }
 
-export function useSchedules ({ date, dep }: { date: string, dep: string }) {
+export function useSchedules ({ date }: { date: string }) {
     const { data: session } = useSession()
     const [data, setData] = useState<any[] | null>(null)
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState<string | null>(null)
 
-    const fetchSchedules = useCallback(async (date: string, dep: string) => {
+    const fetchSchedules = useCallback(async (date: string) => {
         try {
-            const response = await fetch(`/api/schedule?date=${date}&dep=${dep}`, {
+            const response = await fetch(`/api/schedule?date=${date}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -100,8 +102,8 @@ export function useSchedules ({ date, dep }: { date: string, dep: string }) {
     }, [])
 
     useEffect(() => {
-        fetchSchedules(date, dep)
-    }, [date, dep])
+        fetchSchedules(date)
+    }, [date])
 
     return { data, isLoading, error }
 }

@@ -5,7 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { EmployeeCard } from "@/components/ui";
 import { useWorkings } from "@/lib/hooks/useWorking";
 
-const WorkingList = ({ schedules }: { schedules: any[] }) => {
+const WorkingList = ({ schedules }: { schedules: any[] | null }) => {
     const { data: session } = useSession()
     const { data: employees } = useWorkings({ schedules: schedules })
 

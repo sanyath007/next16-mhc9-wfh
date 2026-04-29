@@ -1,39 +1,24 @@
 'use client'
 
 import { useState, useEffect, useMemo } from 'react'
-import {
-    Users, GraduationCap, MapPin, CheckCircle2, RefreshCw,
-    Building2, ChevronDown, ChevronRight, ArrowLeft,
-    House,
-} from 'lucide-react'
+import { Users, MapPin, RefreshCw, Building2, ChevronDown, House } from 'lucide-react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
-import { DashboardSummary, ConsultRecord } from '@/lib/types'
-import { StatCard, DistrictPanel } from '@/components/ui'
+import { StatCard } from '@/components/ui'
 import { PIE_COLORS } from '@/lib/constants/dashboard'
 import EmployeeList from './EmployeeList'
 import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
 import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
 
-// ─── Types ───────────────────────────────────────────────────────────────────
-interface ApiData {
-    summary: DashboardSummary | null
-    records: ConsultRecord[]
-    uploadId: string
-    years?: number[]             // available years for filtering
-    selectedYear?: number        // year that was used for the data
-}
-
 export default function DashboardPage() {
-    const [data, setData] = useState<ApiData | null>(null)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
 
-    const { data: schedules } = useSchedules({ date: selectedDate, dep: selectedDep })
-    const { data: workings, isLoading } = useWorkings({ schedules: schedules })
+    const { data: schedules } = useSchedules({ date: selectedDate })
+    const { data: workings, isLoading } = useWorkings({ schedules: schedules, dep: selectedDep })
     const { data: employees } = useEmployees()
 
     useEffect(() => {
