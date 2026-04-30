@@ -11,7 +11,7 @@ const WorkingList = ({ schedules }: { schedules: any[] | null }) => {
 
     return (
         <>
-            {employees && employees.slice(0, 4).map((e: any, i: number) => (
+            {employees && employees.map((e: any, i: number) => (
                 <EmployeeCard
                     key={e.id}
                     employee={{
