@@ -14,8 +14,8 @@ import moment from 'moment'
 import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
 
 export default function DashboardPage() {
-    const [trips, setTrips] = useState([]);
-    const [leaves, setLeaves] = useState([]);
+    const [trips, setTrips] = useState<any[]>([]);
+    const [leaves, setLeaves] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
@@ -43,29 +43,29 @@ export default function DashboardPage() {
                 let _employees: any = [];
 
                 /** Deduplicating data */
-                data.forEach(event => {
-                    const isDuplicate = _employees.some(emp => emp.EmId === event.employee?.EmId);
+                data.forEach((event: any) => {
+                    const isDuplicate = _employees.some((emp: any) => emp.EmId === event.employee?.EmId);
                     
                     if (!isDuplicate) {
                         _employees.push(event.employee);
                     }
                 });
 
-                const _trips = _employees.map(employee => {
-                    const _filtered = data.filter(d => employee.EmId === d.employee?.EmId);
+                const _trips = _employees.map((employee: any) => {
+                    const _filtered = data.filter((d: any) => employee.EmId === d.employee?.EmId);
                     /** Listing employee's events */
-                    const events = _filtered.map(e => `${e.OTName} ณ ${e.OTLocation}`).join(', ');
+                    const events = _filtered.map((e: any) => `${e.OTName} ณ ${e.OTLocation}`).join(', ');
 
                     return {
                         id: employee.EmId,
                         name: `${employee.EmPerfix}${employee.EmName}`,
-                        position: employee.EmPosition,
+                        position: { id: parseInt(employee.EmPosition), name: employee.position?.PosName },
+                        department: { id: parseInt(employee.EmSession), name: employee.department?.SeName },
                         events
                     };
                 });
 
                 setTrips(_trips);
-                console.log(_trips);
                 
             }
         } catch (error) {
@@ -100,7 +100,12 @@ export default function DashboardPage() {
                     days: parseFloat(leave.LeaveCountDay), 
                     hours: parseFloat(leave.LeaveCountTime), 
                     status: leave.LeaveStatus,
-                    employee: leave.employee,
+                    employee: {
+                        id: leave.employee.EmId,
+                        name: `${leave.employee.EmPerfix}${leave.employee.EmName}`,
+                        position: { id: parseInt(leave.employee.EmPosition), name: leave.employee.position?.PosName },
+                        department: { id: parseInt(leave.employee.EmSession), name: leave.employee.department?.SeName },
+                    }
                 }))
 
                 setLeaves(_leaves)
@@ -117,14 +122,28 @@ export default function DashboardPage() {
         fetchLeaves()
     }, [selectedDate])
 
+    const tempLeaved = leaves.filter((leave: any) => leave.type === 'ชั่วโมง').length
+    const offices = employees?.filter(e => !workings?.some(w => w.id === e.id) && (!leaves?.some(l => l.id === e.id)) && !trips?.some(t => t.id === e.id))
+
     const stat = {
-        normal: employees?.filter(e => !workings?.some(w => w.id === e.id)).length,
+        normal: offices?.length,
         wfh: workings?.length || 0,
         leaved: leaves.filter((leave: any) => leave.type !== 'ชั่วโมง').length,
         tripped: trips.length,
         total: employees?.length,
     }
-    const tempLeaved = leaves.filter((leave: any) => leave.type === 'ชั่วโมง').length
+
+    const departments = useMemo(() => {
+        return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => {
+            return {
+                name: dep,
+                "สำนักงาน": offices?.filter(e => (e.members[0]?.department?.name as string).includes(dep)).length,
+                "WFH": workings?.filter(w => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
+                "ลา/ไปราชการ": leaves.filter((leave: any) => leave.type !== 'ชั่วโมง' && (leave.employee?.department?.name as string).includes(dep)).length
+                    + trips.filter((trip: any) => (trip.department?.name as string).includes(dep)).length
+            }
+        })
+    }, [selectedDate, selectedDep, offices, workings, leaves, trips])
 
     const pieData = [
         { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)) },
@@ -134,37 +153,11 @@ export default function DashboardPage() {
 
     const barData = useMemo(() => {
         if (!selectedDep) {
-            return [
-                {
-                    name: 'อำนวยการ',
-                    "สำนักงาน": 6,
-                    "WFH": 2,
-                    "ลา/ไปราชการ": 1
-                },
-                {
-                    name: 'วิชาการสุขภาพจิต',
-                    "สำนักงาน": 5,
-                    "WFH": 1,
-                    "ลา/ไปราชการ": 1
-                },
-                {
-                    name: 'วิชาการสุขภาพจิต',
-                    "สำนักงาน": 2,
-                    "WFH": 1,
-                    "ลา/ไปราชการ": 1
-                }
-            ]
+            return departments
         }
 
-        return [
-            {
-                name: selectedDep,
-                "สำนักงาน": 9,
-                "WFH": 1,
-                "ลา/ไปราชการ": 0
-            },
-        ]
-    }, [selectedDep])
+        return departments.filter(dep => dep.name === selectedDep)
+    }, [selectedDate, selectedDep, departments])
 
     // ── Loading / empty states ──────────────────────────────────────────────────
     if (isLoading) return (
@@ -285,7 +278,7 @@ export default function DashboardPage() {
             {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard icon={Users} label="บุคลากรทั้งหมด" value={stat.total!} color="indigo" delay={0} />
-                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal! - (stat.leaved! + stat.tripped!)} color="brand" delay={50} />
+                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal!} color="brand" delay={50} />
                 <StatCard icon={House} label="Work from Home" value={stat.wfh!} color="rose" delay={100} />
                 <StatCard
                     icon={MapPin}
