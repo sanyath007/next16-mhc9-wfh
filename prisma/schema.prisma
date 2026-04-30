@@ -88,6 +88,7 @@ model Department {
   status     Int?
   created_at DateTime? @db.DateTime(0)
   updated_at DateTime? @db.DateTime(0)
+  wpm_ref_id Int?
 
   divisions   Division[]
   members     Member[]
@@ -104,6 +105,7 @@ model Division {
   status        Int?
   created_at    DateTime? @db.DateTime(0)
   updated_at    DateTime? @db.DateTime(0)
+  wpm_ref_id    Int?
 
   department    Department                  @relation(fields: [department_id], references: [id], map: "division_department_ibfk_1")
   members       Member[]

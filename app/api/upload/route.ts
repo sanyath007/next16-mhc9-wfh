@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
                 filename: file.name,
                 uploaded_by: userWithRole.id,
                 work_date: new Date(formData.get('work_date') as string),
-                user_id: 1,
+                employee_id: 1,
                 year: 2025
             },
         })
