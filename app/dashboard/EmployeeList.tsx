@@ -31,7 +31,7 @@ const EmployeeList = ({ employees }: { employees?: any[] | null }) => {
                                 className="hover:bg-brand-50/30 transition-colors cursor-pointer group animate-fadeInUp"
                                 style={{ animationDelay: `${i * 60}ms` }}
                             >
-                                <td className="px-5 py-4 text-sm">
+                                <td className="px-5 py-2 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-slate-900">
                                             {employee.prefix?.name}{employee.firstname} {employee.lastname}
@@ -39,13 +39,13 @@ const EmployeeList = ({ employees }: { employees?: any[] | null }) => {
                                         {/* <ChevronRight className="w-3.5 h-3.5 text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity" /> */}
                                     </div>
                                 </td>
-                                <td className="px-5 py-4 text-sm text-slate-600">
+                                <td className="px-5 py-2 text-sm text-slate-600">
                                     {employee.position?.name}{employee.level ? employee.level?.name : ''}
                                 </td>
-                                <td className="px-5 py-4 text-sm text-slate-600">
+                                <td className="px-5 py-2 text-sm text-slate-600">
                                     {employee.members[0]?.department?.name}
                                 </td>
-                                <td className="px-5 py-4 text-center">
+                                <td className="px-5 py-2 text-center">
                                     {/* <ProgressBar value={p.studentCompleted} max={p.studentRequested} /> */}
                                     <button type="button" className="text-emerald-500 cursor-pointer">
                                         <NotepadText className="w-6 h-6" />

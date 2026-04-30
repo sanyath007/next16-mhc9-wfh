@@ -14,17 +14,19 @@ import moment from 'moment'
 import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
 
 export default function DashboardPage() {
-    const [events, setEvents] = useState([]);
+    const [trips, setTrips] = useState([]);
+    const [leaves, setLeaves] = useState([]);
+    const [isLoading, setIsLoading] = useState(false)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
 
     const { data: schedules } = useSchedules({ date: selectedDate })
-    const { data: workings, isLoading } = useWorkings({ schedules: schedules, dep: selectedDep })
+    const { data: workings } = useWorkings({ schedules: schedules, dep: selectedDep })
     const { data: employees } = useEmployees()
 
     const fetchEvents = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8081/laravel80-mhc9-erp-api/public/api/events?sdate=${selectedDate}&edate=${selectedDate}`, {
+            const response = await fetch(`http://localhost:8081/laravel80-mhc9-erp/public/api/events?sdate=${selectedDate}&edate=${selectedDate}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,90 +39,92 @@ export default function DashboardPage() {
             }
 
             const data = await response.json()
-            console.log(data);
-
             if (data) {
-                let _data: any = [];
+                let _employees: any = [];
 
-                /** ====================== Deduplicating data ====================== */
+                /** Deduplicating data */
                 data.forEach(event => {
-                    const isDuplicate = _data.some(d => new Date(d.OTBHDate).toDateString() === new Date(event.OTBHDate).toDateString() && d.OTBH === event.OTBH);
+                    const isDuplicate = _employees.some(emp => emp.EmId === event.employee?.EmId);
                     
                     if (!isDuplicate) {
-                        _data.push(event);
+                        _employees.push(event.employee);
                     }
                 });
 
-                const _events = _data.map(event => {
-                    const _filtered = data.filter(d => new Date(event.OTBHDate).toDateString() === new Date(d.OTBHDate).toDateString() && event.OTBH === d.OTBH);
+                const _trips = _employees.map(employee => {
+                    const _filtered = data.filter(d => employee.EmId === d.employee?.EmId);
+                    /** Listing employee's events */
+                    const events = _filtered.map(e => `${e.OTName} ณ ${e.OTLocation}`).join(', ');
 
-                    /** ====================== Counting attendees ====================== */
-                    const attendeeAmt = _filtered.reduce((acc, cur) => {
-                        if (event.OTEmid !== cur.OTEmid) {
-                            acc = acc + 1;
-                        }
-
-                        return acc;
-                    }, 1);
-
-                    /** ====================== Listing attendee's name ====================== */
-                    const attendees = _filtered.map(d => d.employee?.EmName.split(' ')[0]).join(', ');
-
-                    /** ====================== Creating events data for calendar ====================== */
                     return {
-                        id: event.OTId,
-                        title: event.OTName,
-                        location: event.OTLocation,
-                        date: new Date(event.OTDateProject), // Ensure start date is a Date object
-                        from: new Date(event.OTDateProject), // Ensure start date is a Date object
-                        to: event.OTDateProject2 && new Date(event.OTDateProject2), // Ensure end date is a Date object
-                        time: new Date(event.OTDateGo).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                        duration: `${event.OTDuration} min`,
-                        attendees: attendees,
-                        people: attendeeAmt,
-                        color: event.OTEmid === '48' ? "from-[#f59b9b] to-[#f59b9b]" : "from-[#a1c9a1] to-[#a1c9a1]"
+                        id: employee.EmId,
+                        name: `${employee.EmPerfix}${employee.EmName}`,
+                        position: employee.EmPosition,
+                        events
                     };
                 });
 
-                // ถ้าเป็นงานที่มีหลายวันติดกัน ให้สร้าง event เพิ่มตามจำนวนวันที่ไป
-                const _tempEvents = _events.filter(e => !!e.to);
-                _tempEvents.forEach(e => {
-                    const _startDate = moment(e.from);
-                    const _endDate = e.to && moment(e.to);
-                    const _diffDays = _endDate ? _endDate.diff(_startDate, 'days') : 0;
-
-                    if (_diffDays > 0) {
-                        for (let i = 1; i <= _diffDays; i++) {
-                            const newDate = moment(_startDate).add(i, 'days').toDate();
-                            _events.push({
-                                ...e,
-                                date: newDate
-                            });
-                        }
-                    }
-                });
-
-                setEvents(_events);
-                console.log(_events);
+                setTrips(_trips);
+                console.log(_trips);
+                
             }
         } catch (error) {
             
         }
-    }, [])
+    }, [selectedDate])
+
+    const fetchLeaves = useCallback(async () => {
+        setIsLoading(true)
+
+        try {
+            const response = await fetch(`http://localhost:8081/laravel80-mhc9-erp/public/api/leaves?sdate=${selectedDate}&edate=${selectedDate}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': `${process.env.NEXT_PUBLIC_API_KEY}`,
+                },
+            })
+
+            if (!response.ok) {
+                throw new Error('Failed to authenticate');
+            }
+
+            const data = await response.json()
+            if (data) {
+                const _leaves = data.map((leave: any) => ({
+                    id: leave.LeaveId,
+                    type: leave.LeaveName,
+                    start: leave.LeaveDate1,
+                    end: leave.LeaveDate2,
+                    time: leave.LeaveTime1,
+                    days: parseFloat(leave.LeaveCountDay), 
+                    hours: parseFloat(leave.LeaveCountTime), 
+                    status: leave.LeaveStatus,
+                    employee: leave.employee,
+                }))
+
+                setLeaves(_leaves)
+            }
+        } catch (error) {
+            
+        } finally {
+            setIsLoading(false)
+        }
+    }, [selectedDate])
 
     useEffect(() => {
         fetchEvents()
-    }, [])
-
-    // const provinceRecords = useMemo(() => selectedDep ? allRecords.filter(r => r.province === selectedDep) : [], [allRecords, selectedDep])
+        fetchLeaves()
+    }, [selectedDate])
 
     const stat = {
         normal: employees?.filter(e => !workings?.some(w => w.id === e.id)).length,
-        wfh: workings?.length,
-        leaved: 2,
-        tripped: 4,
+        wfh: workings?.length || 0,
+        leaved: leaves.filter((leave: any) => leave.type !== 'ชั่วโมง').length,
+        tripped: trips.length,
         total: employees?.length,
     }
+    const tempLeaved = leaves.filter((leave: any) => leave.type === 'ชั่วโมง').length
 
     const pieData = [
         { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)) },
@@ -177,15 +181,15 @@ export default function DashboardPage() {
         <div className="space-y-8">
 
             {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
+            <div className="flex items-center justify-between max-md:justify-end">
+                <div className="max-md:hidden">
                     <h1 className="font-display text-3xl font-bold text-slate-900">
                         {selectedDep
                         ? `กลุ่มงาน${selectedDep}`
                         : 'รายงานผลงานการ Work from Home'}
                     </h1>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 max-md:w-full">
                     {/* year filter */}
                     <div className="w-full">
                         <DatePicker
@@ -196,10 +200,6 @@ export default function DashboardPage() {
                             inputCss='border-slate-200 hover:border-slate-300 hover:shadow-sm'
                         />
                     </div>
-
-                    <button type="button" className="btn-secondary flex items-center gap-2 text-sm">
-                        <RefreshCw className="w-4 h-4" />รีเฟรช
-                    </button>
                 </div>
             </div>
 
@@ -284,10 +284,16 @@ export default function DashboardPage() {
 
             {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <StatCard icon={Users} label="บุคลากรทั้งหมด" value={stat.total!} color="indigo"   delay={0} />
-                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal! - (stat.leaved! + stat.tripped!)} color="brand"   delay={50} />
+                <StatCard icon={Users} label="บุคลากรทั้งหมด" value={stat.total!} color="indigo" delay={0} />
+                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal! - (stat.leaved! + stat.tripped!)} color="brand" delay={50} />
                 <StatCard icon={House} label="Work from Home" value={stat.wfh!} color="rose" delay={100} />
-                <StatCard icon={MapPin} label="ลา/ไปราชการ" value={stat.leaved! + stat.tripped!} color="emerald"   delay={150} />
+                <StatCard
+                    icon={MapPin}
+                    label="ลา/ไปราชการ"
+                    value={stat.leaved! + stat.tripped! + ` (${tempLeaved})`}
+                    color="emerald"
+                    delay={150}
+                />
             </div>
 
             {/* Charts */}

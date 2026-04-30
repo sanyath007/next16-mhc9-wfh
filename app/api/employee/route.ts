@@ -59,7 +59,11 @@ export async function GET(req: NextRequest) {
             prefix: true,
             position: true,
             level: true,
-            members: true,
+            members: {
+                include: {
+                    department: true
+                }
+            },
             changwat: true,
             amphur: true,
             tambon: true,
