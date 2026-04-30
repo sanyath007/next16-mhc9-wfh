@@ -186,7 +186,7 @@ export default function DashboardPage() {
                     <h1 className="font-display text-3xl font-bold text-slate-900">
                         {selectedDep
                         ? `กลุ่มงาน${selectedDep}`
-                        : 'รายงานผลงานการ Work from Home'}
+                        : 'รายงานผลงานการ Work From Home'}
                     </h1>
                 </div>
                 <div className="flex items-center gap-2 max-md:w-full">
