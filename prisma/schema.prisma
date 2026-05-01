@@ -32,10 +32,12 @@ model Session {
 }
 
 model Schedule {
-  id          String   @id @default(cuid())
-  work_date   DateTime
+  id          String    @id @default(cuid())
+  work_date   DateTime  @db.Date
   employee_id Int
   report_file String
+  created_by  Int
+  created_at  DateTime   @default(now())
 
   employee   Employee                   @relation(fields: [employee_id], references: [id], map: "schedule_employee_ibfk_1")
 
@@ -43,13 +45,13 @@ model Schedule {
 }
 
 model DataUpload {
-  id          String   @id @default(cuid())
+  id          String    @id @default(cuid())
   filename    String
-  employee_id Int
+  work_date   DateTime  @db.Date
   year        Int
-  work_date   DateTime
-  uploaded_at DateTime @default(now())
-  uploaded_by String
+  employee_id Int
+  uploaded_by Int
+  uploaded_at DateTime  @default(now())
 
   employee   Employee                   @relation(fields: [employee_id], references: [id], map: "datau_upload_employee_ibfk_1")
 

@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userWithRole = session?.user as { role: string; id: string }
+    const userWithRole = session?.user as { id: number, role: string }
     if (userWithRole.role === 'VIEWER') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -21,7 +21,8 @@ export async function POST(req: NextRequest) {
             data: {
                 work_date: new Date(work_date),
                 employee_id,
-                report_file: ''
+                report_file: '',
+                created_by: userWithRole.id
             },
         })
 

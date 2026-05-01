@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
                 work_date: new Date(formData.get('work_date') as string),
                 employee_id: userWithRole.employee_id,
                 year: 2026,
-                uploaded_by: userWithRole.id.toString()
+                uploaded_by: userWithRole.id
             },
         })
 
