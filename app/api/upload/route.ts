@@ -9,7 +9,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userWithRole = session?.user as { role: string; id: string }
+    const userWithRole = session?.user as { id: number, role: string, employee_id: number }
     if (userWithRole.role === 'VIEWER') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -29,10 +29,10 @@ export async function POST(req: NextRequest) {
         const upload = await prisma.dataUpload.create({
             data: {
                 filename: file.name,
-                uploaded_by: userWithRole.id,
                 work_date: new Date(formData.get('work_date') as string),
-                employee_id: 1,
-                year: 2025
+                employee_id: userWithRole.employee_id,
+                year: 2026,
+                uploaded_by: userWithRole.id.toString()
             },
         })
 

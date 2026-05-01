@@ -12,6 +12,7 @@ declare module "next-auth" {
     interface User {
         id: number; // match your database type
         role: string;
-        accessToken: string;
+        employee_id: number;
+        access_token: string;
     }
 }

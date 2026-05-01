@@ -30,7 +30,8 @@ export default {
           email: user.email,
           name: user.name,
           role: 'ADMIN', //user.role
-          accessToken: user.token, 
+          access_token: user.token, 
+          employee_id: user.employee_id
         }
       },
     }),

@@ -60,7 +60,6 @@ export default function UploadPage() {
 
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('user_id', `${session?.user?.id}`) // TODO: change to employee_id instead
         formData.append('work_date', new Date().toISOString())
 
         try {
