@@ -1,13 +1,13 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Users, MapPin, RefreshCw, Building2, ChevronDown, House } from 'lucide-react'
+import { Users, MapPin, Building2, ChevronDown, House } from 'lucide-react'
+import { useSession } from 'next-auth/react'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts'
 import { StatCard } from '@/components/ui'
-import { PIE_COLORS } from '@/lib/constants/dashboard'
 import EmployeeList from './EmployeeList'
 import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
@@ -19,6 +19,7 @@ export default function DashboardPage() {
     const [isLoading, setIsLoading] = useState(false)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
+    const { data: session } = useSession()
 
     const { data: schedules } = useSchedules({ date: selectedDate })
     const { data: workings } = useWorkings({ schedules: schedules, dep: selectedDep })
@@ -26,11 +27,12 @@ export default function DashboardPage() {
 
     const fetchEvents = useCallback(async () => {
         try {
-            const response = await fetch(`http://localhost:8081/laravel80-mhc9-erp/public/api/events?sdate=${selectedDate}&edate=${selectedDate}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_API_URL}/api/m2m/events?sdate=${selectedDate}&edate=${selectedDate}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-API-KEY': `${process.env.NEXT_PUBLIC_API_KEY}`,
+                    Authorization: `Bearer ${session?.user?.access_token}`
+                    // 'X-API-KEY': `${process.env.NEXT_PUBLIC_API_KEY}`,
                 },
             })
 
@@ -77,11 +79,12 @@ export default function DashboardPage() {
         setIsLoading(true)
 
         try {
-            const response = await fetch(`http://localhost:8081/laravel80-mhc9-erp/public/api/leaves?sdate=${selectedDate}&edate=${selectedDate}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_DATA_API_URL}/api/m2m/leaves?sdate=${selectedDate}&edate=${selectedDate}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-API-KEY': `${process.env.NEXT_PUBLIC_API_KEY}`,
+                    Authorization: `Bearer ${session?.user?.access_token}`
+                    // 'X-API-KEY': `${process.env.NEXT_PUBLIC_API_KEY}`,
                 },
             })
 
@@ -122,8 +125,17 @@ export default function DashboardPage() {
         fetchLeaves()
     }, [selectedDate])
 
-    const tempLeaved = leaves.filter((leave: any) => leave.type === 'ชั่วโมง').length
-    const offices = employees?.filter(e => !workings?.some(w => w.id === e.id) && (!leaves?.some(l => l.id === e.id)) && !trips?.some(t => t.id === e.id))
+    const tempLeaved = useMemo(() => {
+        return leaves.filter((leave: any) => leave.type === 'ชั่วโมง').length
+    }, [leaves])
+
+    const offices = useMemo(() => {
+        return employees?.filter(e => 
+            !workings?.some(w => w.id === parseInt(e.id))
+                && (!leaves?.some(l => l.id === parseInt(e.employee_no)))
+                && !trips?.some(t => t.id === parseInt(e.employee_no))
+        )
+    }, [workings, leaves, trips])
 
     const stat = {
         normal: offices?.length,
@@ -134,22 +146,20 @@ export default function DashboardPage() {
     }
 
     const departments = useMemo(() => {
-        return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => {
-            return {
-                name: dep,
-                "สำนักงาน": offices?.filter(e => (e.members[0]?.department?.name as string).includes(dep)).length,
-                "WFH": workings?.filter(w => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
-                "ลา/ไปราชการ": leaves.filter((leave: any) => leave.type !== 'ชั่วโมง' && (leave.employee?.department?.name as string).includes(dep)).length
-                    + trips.filter((trip: any) => (trip.department?.name as string).includes(dep)).length
-            }
-        })
+        return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => ({
+            name: dep,
+            "สำนักงาน": offices?.filter(e => (e.members[0]?.department?.name as string).includes(dep)).length,
+            "WFH": workings?.filter(w => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
+            "ลา/ไปราชการ": leaves.filter((leave: any) => leave.type !== 'ชั่วโมง' && (leave.employee?.department?.name as string).includes(dep)).length
+                + trips.filter((trip: any) => (trip.department?.name as string).includes(dep)).length
+        }))
     }, [selectedDate, selectedDep, offices, workings, leaves, trips])
 
     const pieData = [
-        { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)) },
-        { name: 'WFH', value: stat?.wfh ?? 0 },
-        { name: 'ลา/ไปราชการ', value: (stat?.leaved ?? 0) + (stat?.tripped ?? 0) },
-    ].filter(d => d.value > 0)
+        { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)), color: '#3C9EDB' },
+        { name: 'WFH', value: stat?.wfh ?? 0, color: '#f43f5e' },
+        { name: 'ลา/ไปราชการ', value: (stat?.leaved ?? 0) + (stat?.tripped ?? 0), color: '#5bcf8f' },
+    ]
 
     const barData = useMemo(() => {
         if (!selectedDep) {
@@ -328,7 +338,7 @@ export default function DashboardPage() {
                     <ResponsiveContainer width="100%" height={200}>
                         <PieChart>
                             <Pie data={pieData} cx="50%" cy="50%" innerRadius={55} outerRadius={85} paddingAngle={3} dataKey="value">
-                                {pieData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i]} />)}
+                                {pieData.map((_, i) => <Cell key={i} fill={_.color} />)}
                             </Pie>
                             <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #e2e8f0', fontFamily: 'IBM Plex Sans Thai', fontSize: 12 }} />
                         </PieChart>
@@ -337,7 +347,7 @@ export default function DashboardPage() {
                         {pieData.map((e, i) => (
                             <div key={e.name} className="flex items-center justify-between text-sm">
                                 <div className="flex items-center gap-2">
-                                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: PIE_COLORS[i] }} />
+                                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: e.color }} />
                                     <span className="text-slate-600">{e.name}</span>
                                 </div>
                                 <span className="font-mono font-medium text-slate-800">{e.value.toLocaleString()}</span>
