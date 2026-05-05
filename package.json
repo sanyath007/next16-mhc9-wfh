@@ -10,10 +10,7 @@
     "lint": "next lint",
     "db:push": "prisma db push",
     "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts",
-    "db:seed:provinces": "tsx prisma/seed-provinces-sql.ts",
-    "db:seed:districts": "tsx prisma/seed-districts-sql.ts",
-    "db:seed:schools": "tsx prisma/seed-schools-sql.ts"
+    "db:seed": "tsx prisma/seed.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",

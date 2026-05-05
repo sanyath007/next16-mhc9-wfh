@@ -1,11 +1,11 @@
-# AGENTS.md - AI Agent Instructions for Next.js Consulting Dashboard
+# AGENTS.md - AI Agent Instructions for Next.js Employee work tracking dashboard
 
 ## Project Overview
-This is a Next.js 16 consulting tracking dashboard for managing school consultation records with OCR upload capabilities. The app tracks consultation requests, completions, and statistics across a province-district-school hierarchy in Thailand.
+This is a Next.js 16 employee work tracking dashboard for monitoring work-from-home (WFH), office attendance, leaves, and business trips. The app tracks employee work status across departments with real-time data visualization and filtering capabilities.
 
 ## Tech Stack
 - **Framework**: Next.js 16.1.6 with App Router and TypeScript (strict mode enabled)
-- **Database**: Prisma ORM with SQLite, using snake_case fields mapped to PascalCase models
+- **Database**: Prisma ORM with MySQL, using snake_case fields mapped to PascalCase models
 - **Authentication**: NextAuth v5 (Beta) with JWT sessions and role-based access (ADMIN, EDITOR, VIEWER)
 - **Styling**: Tailwind CSS v4.2 with custom utilities in `app/globals.css`
 - **OCR**: Tesseract.js with Thai+English support for PDF/image processing
@@ -15,7 +15,7 @@ This is a Next.js 16 consulting tracking dashboard for managing school consultat
 
 ### TypeScript
 - Use strict mode; define interfaces at component/file scope
-- PascalCase for types/interfaces (`ConsultRecord`, `ProvinceStats`)
+- PascalCase for types/interfaces (`Employee`, `Schedule`)
 - SCREAMING_SNAKE_CASE for enums (`REQUESTED`, `COMPLETED`)
 - Single path alias: `@/*` points to workspace root
 
@@ -53,17 +53,18 @@ This is a Next.js 16 consulting tracking dashboard for managing school consultat
 - Responsive: Mobile-first, `hidden lg:flex` for desktop-only
 
 ## Project-Specific Patterns
-- **Location Levels**: Computed from ID presence (1=province, 2=district, 3=school)
-- **Completion Rates**: `(completed / requested) * 100`, color-coded badges
-- **CSV Upload**: Parse → Validate headers → Lookup locations → Create record/statistics
-- **Filtering**: Multi-level by upload, province, year
+- **Work Status Tracking**: Tracks employee work status as WFH, office, leave, or business trip
+- **Department Filtering**: Filter by departments (อำนวยการ, วิชาการสุขภาพจิต, บริการสุขภาพจิต)
+- **Date Filtering**: Single date selection for daily work status tracking
+- **CSV Upload**: Parse PDF → Extract employee data → Validate → Create data upload records
+- **Statistics Calculation**: Calculate percentages for WFH, office, leave, and trip statuses
 - **Language**: Thai-first UI, `lang="th"`, Thai fonts
 - **Error Handling**: Try-catch in APIs, console.error, JSON responses
 
 ## Build & Run
 - Install: `npm install`
-- Database: `npx prisma generate && npx prisma db push`
-- Seed: `npx prisma db seed`
+- Database: `npm run db:push` (runs `prisma db push`)
+- Seed: `npm run db:seed` (runs `tsx prisma/seed.ts`)
 - Dev: `npm run dev`
 - Build: `npm run build`
 

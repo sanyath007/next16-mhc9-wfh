@@ -1,7 +1,7 @@
-# GEMINI.md - Consulting Tracking System (ระบบติดตามการให้คำปรึกษา)
+# GEMINI.md - Employee Work Tracking System (รายงานผลงานการ Work From Home)
 
 ## Project Overview
-This project is a comprehensive **Consulting Tracking System Dashboard** designed to monitor and visualize student consulting statistics across Thailand. It provides a multi-level drill-down interface (National → Province → District → School) to track the progress of consulting sessions, from initial requests to completion.
+This project is a comprehensive **Employee Work Tracking Dashboard** designed to for monitoring work-from-home (WFH), office attendance, leaves, and business trips. The app tracks employee work status across departments with real-time data visualization and filtering capabilities.
 
 The application features a modern **Glassmorphism** aesthetic, emphasizing clarity, depth, and interactive data visualization.
 

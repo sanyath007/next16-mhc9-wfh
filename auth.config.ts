@@ -1,7 +1,8 @@
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
-import { prisma } from '@/lib/prisma'
+// import bcrypt from 'bcryptjs'
+// import { prisma } from '@/lib/prisma'
 import { AuthService } from './lib/services/auth-service'
+import { fetchOAuthToken } from './lib/oauth'
 
 export default {
   providers: [
@@ -15,6 +16,7 @@ export default {
         if (!credentials?.email || !credentials?.password) return null
 
         const user = await AuthService.getInstance().login(credentials.email as string, credentials.password as string)
+        const oauth = await fetchOAuthToken()
 
         // const user = await prisma.user.findUnique({
         //   where: { email: credentials.email as string },
@@ -30,7 +32,7 @@ export default {
           email: user.email,
           name: user.name,
           role: 'ADMIN', //user.role
-          access_token: user.token, 
+          access_token: oauth.access_token, 
           employee_id: user.employee_id
         }
       },
