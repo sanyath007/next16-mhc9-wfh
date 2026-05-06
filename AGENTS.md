@@ -68,6 +68,17 @@ This is a Next.js 16 employee work tracking dashboard for monitoring work-from-h
 - Dev: `npm run dev`
 - Build: `npm run build`
 
+## Git Commit Conventions
+Follow [Conventional Commits](https://www.conventionalcommits.org/) for commit messages:
+- **Format**: `<type>(<scope>): <description>`
+- **Types**: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`
+- **Scope**: Optional; specifies the part of the codebase (e.g., `dashboard`, `api`, `components`)
+- **Description**: Brief summary in imperative mood (e.g., "add feature" not "added feature")
+- **Examples**:
+  - `feat(dashboard): add department filtering`
+  - `fix(api/schedule): correct date parsing error`
+  - `docs(AGENTS.md): update project documentation to reflect employee work tracking dashboard purpose`
+
 ## Key Files
 - [prisma/schema.prisma](prisma/schema.prisma): Database schema
 - [app/dashboard/page.tsx](app/dashboard/page.tsx): Main dashboard with accordion pattern
