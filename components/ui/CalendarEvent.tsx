@@ -1,5 +1,6 @@
 "use client"
 
+import moment from "moment";
 import { useState } from "react";
 import { DAY_NAMES, MONTH_TH_NAMES } from "@/lib/constants/date-time";
 import {
@@ -17,7 +18,8 @@ type CalendarProps = {
     showNext: boolean,
     onPrev: () => void,
     onNext: () => void,
-    onDayClick: (date: Date) => void
+    onDayClick: (date: Date) => void,
+    events?: { date: string | Date, count?: number }[]
 };
 
 export default function Calendar({
@@ -27,11 +29,18 @@ export default function Calendar({
     showNext,
     onPrev,
     onNext,
-    onDayClick
+    onDayClick,
+    events = []
 }: CalendarProps) {
     const today     = startOfDay(new Date());
     const totalDays = getDaysInMonth(year, month);
     const firstDay  = getFirstDayOfMonth(year, month);
+
+    const getEventCount = (date: Date) => {
+        const dateStr = moment(date).format('YYYY-MM-DD');
+        return events.filter(e => moment(e.date).format('YYYY-MM-DD') === dateStr)
+            .reduce((acc, e) => acc + (e.count || 1), 0);
+    };
 
     const cells = [
         ...Array(firstDay).fill(null),
@@ -73,6 +82,7 @@ export default function Calendar({
 
                     const d0 = startOfDay(date);
                     const isToday = sameDay(d0, today);
+                    const eventCount = getEventCount(d0);
 
                     return (
                         <button
@@ -82,7 +92,7 @@ export default function Calendar({
                                 setSelectedDate(d0)
                             }}
                             className={cn(
-                                "glass flex items-center justify-center transition-all select-none aspect-square w-full h-25 text-sm relative border border-slate-200 rounded-lg",
+                                "glass flex flex-col items-center justify-center transition-all select-none aspect-square w-full h-25 text-sm relative border border-slate-200 rounded-lg",
                                 isToday ? "text-brand-400" : "text-slate-600 hover:bg-white/60 hover:text-slate-900",
                                 selectedDate.getDate() === d0.getDate() ? "bg-brand-400/20" : ""
                             )}
@@ -93,6 +103,11 @@ export default function Calendar({
                             )}>
                                 {date.getDate()}
                             </span>
+                            {eventCount > 0 && (
+                                <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-medium">
+                                    {eventCount > 9 ? '9+' : eventCount}
+                                </span>
+                            )}
                         </button>
                     );
                 })}

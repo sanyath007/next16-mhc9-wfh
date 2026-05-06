@@ -45,16 +45,26 @@ export async function GET(req: NextRequest) {
     /** Get query params */
     const searchParams = req.nextUrl.searchParams
     const date = searchParams.get("date")
+    const startDate = searchParams.get("start_date")
+    const endDate = searchParams.get("end_date")
 
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const whereClause: any = {}
+
+    if (date) {
+        whereClause.work_date = new Date(date)
+    } else if (startDate && endDate) {
+        whereClause.work_date = {
+            gte: new Date(startDate),
+            lte: new Date(endDate)
+        }
+    }
+
     const schedules = await prisma.schedule.findMany({
-        where: {
-            work_date: new Date(date!)
-        },
-        take: 20,
+        where: whereClause,
     })
 
     return NextResponse.json(schedules)

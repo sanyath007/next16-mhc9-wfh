@@ -13,6 +13,7 @@ export default function SchedulePage() {
     const [currentMonth, setCurrentMonth] = useState(initMonth);
     const [currentYear,  setCurrentYear]  = useState(today.getFullYear());
     const [schedules, setSchedules] = useState<any[]>([])
+    const [monthSchedules, setMonthSchedules] = useState<any[]>([])
     const [selectedDate, setSelectedDate] = useState(moment().format('YYYY-MM-DD'))
 
     const prevMonth = () => {
@@ -51,9 +52,35 @@ export default function SchedulePage() {
         }
     }, [])
 
+    const fetchMonthSchedules = useCallback(async (year: number, month: number) => {
+        try {
+            const startDate = moment([year, month, 1]).startOf('month').format('YYYY-MM-DD');
+            const endDate = moment([year, month, 1]).endOf('month').format('YYYY-MM-DD');
+            const response = await fetch(`/api/schedule?start_date=${startDate}&end_date=${endDate}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch month schedules');
+            }
+
+            const data = await response.json()
+            setMonthSchedules(data);
+        } catch (error) {
+            console.error(error);
+        }
+    }, [])
+
     useEffect(() => {
         fetchSchedules(selectedDate)
     }, [selectedDate])
+
+    useEffect(() => {
+        fetchMonthSchedules(currentYear, currentMonth)
+    }, [currentYear, currentMonth])
 
     return (
         <div className="space-y-8">
@@ -78,12 +105,19 @@ export default function SchedulePage() {
                         month={currentMonth}
                         showPrev
                         showNext
-                        onPrev={prevMonth}
-                        onNext={nextMonth}
+                        onPrev={() => {
+                            prevMonth()
+                            fetchMonthSchedules(currentMonth === 0 ? currentYear - 1 : currentYear, currentMonth === 0 ? 11 : currentMonth - 1)
+                        }}
+                        onNext={() => {
+                            nextMonth()
+                            fetchMonthSchedules(currentMonth === 11 ? currentYear + 1 : currentYear, currentMonth === 11 ? 0 : currentMonth + 1)
+                        }}
                         onDayClick={(date) => {
                             setSelectedDate(moment(date).format('YYYY-MM-DD'))
                             setSchedules([])
                         }}
+                        events={monthSchedules.map((s: any) => ({ date: s.schedule_date, count: 1 }))}
                     />
                 </div>
             </div>
