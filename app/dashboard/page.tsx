@@ -13,13 +13,22 @@ import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
 import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
 
+type DepartmentData = {
+    name: string
+    office: { count: number, lists: any }
+    wfh: { count: number, lists: any }
+    leave: { count: number, lists: any }
+    trip: { count: number, lists: any }
+    total: { count: number, lists: any }
+}
+
 export default function DashboardPage() {
+    const { data: session } = useSession()
     const [trips, setTrips] = useState<any[]>([]);
     const [leaves, setLeaves] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false)
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
-    const { data: session } = useSession()
 
     const { data: schedules } = useSchedules({ date: selectedDate })
     const { data: workings } = useWorkings({ schedules: schedules, dep: selectedDep })
@@ -131,45 +140,103 @@ export default function DashboardPage() {
 
     const offices = useMemo(() => {
         return employees?.filter(e => 
-            !workings?.some(w => w.id === parseInt(e.id))
-                && (!leaves?.some(l => l.id === parseInt(e.employee_no)))
-                && !trips?.some(t => t.id === parseInt(e.employee_no))
+                (!workings?.some(w => w.id === parseInt(e.id)))
+                && (!leaves?.filter((leave: any) => leave.type !== 'ชั่วโมง').some(l => l.employee?.id === parseInt(e.employee_no)))
+                && (!trips?.some(t => t.id === parseInt(e.employee_no)))
         )
     }, [workings, leaves, trips])
 
-    const stat = {
-        normal: offices?.length,
-        wfh: workings?.length || 0,
-        leaved: leaves.filter((leave: any) => leave.type !== 'ชั่วโมง').length,
-        tripped: trips.length,
-        total: employees?.length,
-    }
-
     const departments = useMemo(() => {
-        console.log(leaves, trips);
-        
         return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => ({
-            name: dep,
-            "สำนักงาน": offices?.filter(e => (e.members[0]?.department?.name as string).includes(dep)).length,
-            "WFH": workings?.filter(w => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
-            "ลา/ไปราชการ": leaves.filter((leave: any) => leave.type !== 'ชั่วโมง' && (leave.employee?.department?.name as string).includes(dep)).length
-                + trips.filter((trip: any) => (trip.department?.name as string).includes(dep)).length
+            name:   dep,
+            office: {
+                count:  offices?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep)).length,
+                lists:  offices?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep))
+            },
+            wfh: {
+                count:  workings?.filter((w: any) => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
+                lists:  workings?.filter((w: any) => (w.members[0]?.department?.name as string).includes(dep))
+            },
+            leave: {
+                count:  leaves.filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string).includes(dep)).length,
+                lists:  employees?.filter((e: any) => 
+                            leaves
+                                .filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string).includes(dep))
+                                .some(l => l.employee?.id === parseInt(e.employee_no))
+                        )
+            },
+            trip: {
+                count:  trips.filter((t: any) => (t.department?.name as string).includes(dep)).length,
+                lists:  employees?.filter((e: any) => 
+                            trips
+                                .filter((t: any) => (t.department?.name as string).includes(dep))
+                                .some(t => t.id === parseInt(e.employee_no))
+                        )
+            },
+            total: {
+                count:  employees?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep)).length,
+                lists:  employees?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep))
+            }
         }))
     }, [selectedDate, selectedDep, offices, workings, leaves, trips])
 
-    const pieData = [
-        { name: 'สำนักงาน', value: (stat?.normal ?? 0) - ((stat?.leaved ?? 0) + (stat?.tripped ?? 0)), color: '#3C9EDB' },
-        { name: 'WFH', value: stat?.wfh ?? 0, color: '#f43f5e' },
-        { name: 'ลา/ไปราชการ', value: (stat?.leaved ?? 0) + (stat?.tripped ?? 0), color: '#5bcf8f' },
-    ]
+    const stat = useMemo(() => {
+        if (!selectedDep) {
+            return {
+                office: offices?.length || 0,
+                wfh:    workings?.length || 0,
+                leave:  leaves.filter((leave: any) => leave.type !== 'ชั่วโมง').length || 0,
+                trip:   trips.length || 0,
+                total:  employees?.length || 0,
+            }
+        }
+
+        const dep = departments.find(dep => dep.name === selectedDep) as DepartmentData
+        return {
+            office:     dep?.office.count,
+            wfh:        dep?.wfh.count,
+            leave:      dep?.leave.count,
+            trip:       dep?.trip.count,
+            total:      dep?.total.count,
+        }
+    }, [selectedDep, departments])
+
+    const pieData = useMemo(() => {
+        if (!selectedDep) {
+            return [
+                { name: 'สำนักงาน', value: offices?.length ?? 0, color: '#3C9EDB' },
+                { name: 'WFH', value: workings?.length ?? 0, color: '#f43f5e' },
+                { name: 'ลา/ไปราชการ', value: (leaves.filter((leave: any) => leave.type !== 'ชั่วโมง').length ?? 0) + (trips.length ?? 0), color: '#5bcf8f' },
+            ]
+        }
+
+        const dep = departments.find(dep => dep.name === selectedDep) as DepartmentData
+        return [
+            { name: 'สำนักงาน', value: dep.office.count, color: '#3C9EDB' },
+            { name: 'WFH', value: dep.wfh.count, color: '#f43f5e' },
+            { name: 'ลา/ไปราชการ', value: (dep.leave.count) + (dep.trip.count), color: '#5bcf8f' },
+        ]
+    }, [selectedDep, departments])
 
     const barData = useMemo(() => {
         if (!selectedDep) {
-            return departments
+            return departments.map(el => ({
+                name: el.name,
+                'สำนักงาน': el.office.count,
+                'WFH': el.wfh.count,
+                'ลา/ไปราชการ': el.leave.count + el.trip.count,
+            }))
         }
 
-        return departments.filter(dep => dep.name === selectedDep)
-    }, [selectedDate, selectedDep, departments])
+        return departments
+                .filter(dep => dep.name === selectedDep)
+                .map(el => ({
+                    name: el.name,
+                    'สำนักงาน': el.office.count,
+                    'WFH': el.wfh.count,
+                    'ลา/ไปราชการ': el.leave.count + el.trip.count,
+                }))
+    }, [selectedDep, departments])
 
     // ── Loading / empty states ──────────────────────────────────────────────────
     if (isLoading) return (
@@ -290,12 +357,12 @@ export default function DashboardPage() {
             {/* Stat Cards */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <StatCard icon={Users} label="บุคลากรทั้งหมด" value={stat.total!} color="indigo" delay={0} />
-                <StatCard icon={Building2} label="สำนักงาน" value={stat.normal!} color="brand" delay={50} />
+                <StatCard icon={Building2} label="สำนักงาน" value={stat.office!} color="brand" delay={50} />
                 <StatCard icon={House} label="Work from Home" value={stat.wfh!} color="rose" delay={100} />
                 <StatCard
                     icon={MapPin}
                     label="ลา/ไปราชการ"
-                    value={stat.leaved! + stat.tripped! + ` (${tempLeaved})`}
+                    value={stat.leave! + stat.trip! + ` (${tempLeaved})`}
                     color="emerald"
                     delay={150}
                 />
@@ -361,13 +428,32 @@ export default function DashboardPage() {
 
             {/* Work from home employee table */}
             <EmployeeList
-                title="รายชื่อผู้ปฏิบัติงาน Work from Home"
-                employees={workings}
+                title="รายชื่อบุคลากรปฏิบัติงาน ณ สำนักงาน"
+                employees={!selectedDep ? offices : departments.find(dep => dep.name === selectedDep)?.office.lists}
             />
 
             <EmployeeList
-                title="รายชื่อผู้ปฏิบัติงาน ณ สำนักงาน"
-                employees={offices}
+                title="รายชื่อบุคลากรปฏิบัติงาน Work from Home"
+                employees={!selectedDep ? workings : departments.find(dep => dep.name === selectedDep)?.wfh.lists}
+                isReport
+            />
+
+            <EmployeeList
+                title="รายชื่อบุคลากรไปราชการ"
+                employees={!selectedDep
+                    ? employees?.filter((e: any) => trips.some(t => t.id === parseInt(e.employee_no)))
+                    : departments.find(dep => dep.name === selectedDep)?.trip.lists
+                }
+            />
+
+            <EmployeeList
+                title="รายชื่อบุคลากรลา"
+                employees={!selectedDep
+                    ? employees?.filter((e: any) => leaves
+                        .filter((leave: any) => leave.type !== 'ชั่วโมง')
+                        .some(l => l.employee?.id === parseInt(e.employee_no)))
+                    : departments.find(dep => dep.name === selectedDep)?.leave.lists
+                }
             />
         </div>
     )

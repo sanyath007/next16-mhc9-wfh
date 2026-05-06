@@ -1,10 +1,21 @@
 "use client"
 
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { NotepadText } from 'lucide-react'
+import { cn } from '@/lib/utils/tailwindcss'
 
-const EmployeeList = ({ title, employees }: { title: string, employees?: any[] | null }) => {
+const EmployeeList = (
+    { title, employees, isReport = false }: { title: string, employees?: any[] | null, isReport?: boolean }
+) => {
+    const theaders = useMemo(() => {
+        if (isReport) {
+            return ['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน','รายงาน']
+        }
+
+        return ['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน']
+    }, [isReport])
+
     return (
         <div className="card overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex flex-col items-start justify-between">
@@ -15,17 +26,21 @@ const EmployeeList = ({ title, employees }: { title: string, employees?: any[] |
                 <table className="w-full">
                     <thead>
                         <tr className="bg-slate-50 border-b border-slate-100">
-                        {['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน','รายงาน'].map(h => (
-                            <th key={h} className="px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap">
-                                {h}
-                            </th>
-                        ))}
+                            {theaders.map((h: string, i: number) => (
+                                <th 
+                                    key={h}
+                                    className={cn(
+                                        `px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
+                                        !isReport ? 'w-1/3' : i < theaders.length - 1 ? 'w-[36%]' : 'w-1/12'
+                                    )}
+                                >
+                                    {h}
+                                </th>
+                            ))}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
-                        {employees && employees
-                            .filter(e => e.status === 1)
-                            .map((employee, i) => (
+                        {employees && employees.map((employee, i) => (
                             <tr
                                 key={employee.id}
                                 className="hover:bg-brand-50/30 transition-colors cursor-pointer group animate-fadeInUp"
@@ -45,12 +60,12 @@ const EmployeeList = ({ title, employees }: { title: string, employees?: any[] |
                                 <td className="px-5 py-2 text-sm text-slate-600">
                                     {employee.members[0]?.department?.name}
                                 </td>
-                                <td className="px-5 py-2 text-center">
+                                {isReport && <td className="px-5 py-2 text-center">
                                     {/* <ProgressBar value={p.studentCompleted} max={p.studentRequested} /> */}
                                     <button type="button" className="text-emerald-500 cursor-pointer">
                                         <NotepadText className="w-6 h-6" />
                                     </button>
-                                </td>
+                                </td>}
                             </tr>
                         ))}
                     </tbody>

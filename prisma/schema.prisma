@@ -152,7 +152,7 @@ model Employee {
   level_id        Int?
   assigned_at     DateTime? @db.Date
   started_at      DateTime? @db.Date
-  face_descriptor Json?
+  face_descriptor String?   @db.Text
   avatar_url      String?   @db.Text
   remark          String?   @db.Text
   status          Int?
