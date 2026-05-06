@@ -66,17 +66,6 @@ export default function SchedulePage() {
                 <AddSchedule onSuccess={() => fetchSchedules(selectedDate)} />
             </div>
 
-            {/* Section Header */}
-            <div>
-                <div className="px-3 py-3 flex flex-col items-start justify-between">
-                    <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home ประจำวันที่ {formatThaiDate(selectedDate)}</h3>
-                    <span className="text-sm text-slate-400">แสดงรายชื่อของพนักงานในแต่ละวัน</span>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    <WorkingList schedules={schedules} />
-                </div>
-            </div>
-
             {/* Calendar */}
             <div className="card overflow-hidden">
                 <div className="px-6 py-3 border-b border-slate-100 flex flex-col items-start justify-between">
@@ -96,6 +85,18 @@ export default function SchedulePage() {
                             setSchedules([])
                         }}
                     />
+                </div>
+            </div>
+
+            {/* Work From Home Lists */}
+            <div>
+                {/* Section Header */}
+                <div className="px-3 py-3 flex flex-col items-start justify-between">
+                    <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home ประจำวันที่ {formatThaiDate(selectedDate)}</h3>
+                    <span className="text-sm text-slate-400">แสดงรายชื่อของพนักงานในแต่ละวัน</span>
+                </div>
+                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                    <WorkingList schedules={schedules} />
                 </div>
             </div>
         </div>
