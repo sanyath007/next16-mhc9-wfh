@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
                 work_date: new Date(work_date),
                 employee_id,
                 report_file: '',
-                created_by: userWithRole.id
+                created_by: parseInt(userWithRole.id.toString())
             },
         })
 

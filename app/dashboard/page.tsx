@@ -146,6 +146,8 @@ export default function DashboardPage() {
     }
 
     const departments = useMemo(() => {
+        console.log(leaves, trips);
+        
         return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => ({
             name: dep,
             "สำนักงาน": offices?.filter(e => (e.members[0]?.department?.name as string).includes(dep)).length,
@@ -358,8 +360,15 @@ export default function DashboardPage() {
             </div>
 
             {/* Work from home employee table */}
-            <EmployeeList employees={workings} />
+            <EmployeeList
+                title="รายชื่อผู้ปฏิบัติงาน Work from Home"
+                employees={workings}
+            />
 
+            <EmployeeList
+                title="รายชื่อผู้ปฏิบัติงาน ณ สำนักงาน"
+                employees={offices}
+            />
         </div>
     )
 }

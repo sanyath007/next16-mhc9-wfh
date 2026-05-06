@@ -4,11 +4,11 @@ import { useCallback, useEffect, useState } from 'react'
 import { useSession } from 'next-auth/react'
 import { NotepadText } from 'lucide-react'
 
-const EmployeeList = ({ employees }: { employees?: any[] | null }) => {
+const EmployeeList = ({ title, employees }: { title: string, employees?: any[] | null }) => {
     return (
         <div className="card overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex flex-col items-start justify-between">
-                <h3 className="font-display font-semibold text-slate-800">รายชื่อผู้ปฏิบัติงาน Work from Home</h3>
+                <h3 className="font-display font-semibold text-slate-800">{title}</h3>
                 {/* <span className="text-xs text-slate-400">คลิกแถวเพื่อดูรายอำเภอ</span> */}
             </div>
             <div className="overflow-x-auto">
