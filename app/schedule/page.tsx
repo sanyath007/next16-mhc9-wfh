@@ -80,7 +80,7 @@ export default function SchedulePage() {
 
     useEffect(() => {
         fetchMonthSchedules(currentYear, currentMonth)
-    }, [currentYear, currentMonth])
+    }, [currentYear, currentMonth, schedules])
 
     return (
         <div className="space-y-8">
@@ -93,44 +93,46 @@ export default function SchedulePage() {
                 <AddSchedule onSuccess={() => fetchSchedules(selectedDate)} />
             </div>
 
-            {/* Calendar */}
-            <div className="card overflow-hidden">
-                <div className="px-6 py-3 border-b border-slate-100 flex flex-col items-start justify-between">
-                    <h3 className="font-display font-semibold text-lg text-slate-800">ปฏิทินงาน Work From Home</h3>
-                    <span className="text-sm text-slate-400">แสดงตารางงานของแต่ละพนักงานในแต่ละวัน</span>
+            <div className="flex max-md:flex-col gap-4">
+                {/* Calendar */}
+                <div className="card overflow-hidden w-3/5 max-md:w-full">
+                    <div className="px-6 py-3 border-b border-slate-100 flex flex-col items-start justify-between">
+                        <h3 className="font-display font-semibold text-lg text-slate-800">ปฏิทินการ Work From Home</h3>
+                        <span className="text-sm text-slate-400">แสดงตารางการ Work From Home ของพนักงานในแต่ละวัน</span>
+                    </div>
+                    <div className="overflow-x-auto px-4 pb-4">
+                        <Calendar
+                            year={currentYear}
+                            month={currentMonth}
+                            showPrev
+                            showNext
+                            onPrev={() => {
+                                prevMonth()
+                                fetchMonthSchedules(currentMonth === 0 ? currentYear - 1 : currentYear, currentMonth === 0 ? 11 : currentMonth - 1)
+                            }}
+                            onNext={() => {
+                                nextMonth()
+                                fetchMonthSchedules(currentMonth === 11 ? currentYear + 1 : currentYear, currentMonth === 11 ? 0 : currentMonth + 1)
+                            }}
+                            onDayClick={(date) => {
+                                setSelectedDate(moment(date).format('YYYY-MM-DD'))
+                                setSchedules([])
+                            }}
+                            events={monthSchedules.map((s: any) => ({ date: s.work_date, count: 1 }))}
+                        />
+                    </div>
                 </div>
-                <div className="overflow-x-auto px-6 pb-6">
-                    <Calendar
-                        year={currentYear}
-                        month={currentMonth}
-                        showPrev
-                        showNext
-                        onPrev={() => {
-                            prevMonth()
-                            fetchMonthSchedules(currentMonth === 0 ? currentYear - 1 : currentYear, currentMonth === 0 ? 11 : currentMonth - 1)
-                        }}
-                        onNext={() => {
-                            nextMonth()
-                            fetchMonthSchedules(currentMonth === 11 ? currentYear + 1 : currentYear, currentMonth === 11 ? 0 : currentMonth + 1)
-                        }}
-                        onDayClick={(date) => {
-                            setSelectedDate(moment(date).format('YYYY-MM-DD'))
-                            setSchedules([])
-                        }}
-                        events={monthSchedules.map((s: any) => ({ date: s.schedule_date, count: 1 }))}
-                    />
-                </div>
-            </div>
 
-            {/* Work From Home Lists */}
-            <div>
-                {/* Section Header */}
-                <div className="px-3 py-3 flex flex-col items-start justify-between">
-                    <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home ประจำวันที่ {formatThaiDate(selectedDate)}</h3>
-                    <span className="text-sm text-slate-400">แสดงรายชื่อของพนักงานในแต่ละวัน</span>
-                </div>
-                <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                    <WorkingList schedules={schedules} />
+                {/* Work From Home Lists */}
+                <div className="w-2/5 max-md:w-full">
+                    {/* Section Header */}
+                    <div className="px-3 py-3 flex flex-col items-start justify-between">
+                        <h3 className="font-display font-semibold text-lg text-slate-800">รายชื่อผู้ปฏิบัติงาน Work From Home</h3>
+                        <span className="text-sm text-slate-400">ประจำวันที่ {formatThaiDate(selectedDate)}</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-4">
+                        <WorkingList schedules={schedules} />
+                    </div>
                 </div>
             </div>
         </div>

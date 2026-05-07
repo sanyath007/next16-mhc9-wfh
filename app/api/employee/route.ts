@@ -10,7 +10,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userWithRole = session?.user as { role: string; id: string }
+    const userWithRole = session?.user as { id: number, role: string }
     if (userWithRole.role === 'VIEWER') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
     }
@@ -18,19 +18,19 @@ export async function POST(req: NextRequest) {
     const data = await req.json()
     try {
         /** Create upload record */
-        const upload = await prisma.employee.create({
-            data: {
-                prefix_id: new Date(),
-                employee_no: '',
-                firstname: '',
-                lastname: ''
-            },
-        })
+        // const upload = await prisma.employee.create({
+        //     data: {
+        //         prefix_id: 1,
+        //         employee_no: '',
+        //         firstname: '',
+        //         lastname: ''
+        //     },
+        // })
 
-        return NextResponse.json({
-            success: true,
-            uploadId: upload.id
-        })
+        // return NextResponse.json({
+        //     success: true,
+        //     uploadId: upload.id
+        // })
     } catch (error) {
         console.error('Upload error:', error)
         return NextResponse.json(

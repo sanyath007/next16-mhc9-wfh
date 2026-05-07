@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Check, ChevronDown, Plus } from 'lucide-react';
-import { cn } from '../../../utils/tailwindcss';
+import { cn } from '@/lib/utils/tailwindcss';
 
 interface Option {
     value: string;

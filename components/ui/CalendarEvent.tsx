@@ -38,8 +38,9 @@ export default function Calendar({
 
     const getEventCount = (date: Date) => {
         const dateStr = moment(date).format('YYYY-MM-DD');
-        return events.filter(e => moment(e.date).format('YYYY-MM-DD') === dateStr)
-            .reduce((acc, e) => acc + (e.count || 1), 0);
+        return events
+                .filter(e => moment(e.date).format('YYYY-MM-DD') === dateStr)
+                .reduce((acc, e) => acc + (e.count || 1), 0);
     };
 
     const cells = [
@@ -92,20 +93,20 @@ export default function Calendar({
                                 setSelectedDate(d0)
                             }}
                             className={cn(
-                                "glass flex flex-col items-center justify-center transition-all select-none aspect-square w-full h-25 text-sm relative border border-slate-200 rounded-lg",
+                                "glass flex flex-col items-center justify-center transition-all select-none aspect-square w-full h-20 text-sm relative border border-slate-200 rounded-lg cursor-pointer px-1",
                                 isToday ? "text-brand-400" : "text-slate-600 hover:bg-white/60 hover:text-slate-900",
                                 selectedDate.getDate() === d0.getDate() ? "bg-brand-400/20" : ""
                             )}
                         >
                             <span className={cn(
-                                "relative",
+                                "absolute top-2 right-2",
                                 isToday ? "after:absolute after:bottom-[-4px] after:left-1/2 after:-translate-x-1/2 after:w-1 after:h-1 after:rounded-full after:bg-brand-500" : ""
                             )}>
                                 {date.getDate()}
                             </span>
                             {eventCount > 0 && (
-                                <span className="absolute top-1 right-1 w-4 h-4 flex items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-medium">
-                                    {eventCount > 9 ? '9+' : eventCount}
+                                <span className="relative w-full h-4 flex items-center justify-center rounded-full bg-rose-500 text-[10px] text-white font-medium">
+                                    {eventCount > 9 ? '9+' : eventCount} ราย
                                 </span>
                             )}
                         </button>
