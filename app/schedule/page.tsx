@@ -6,7 +6,6 @@ import Calendar from "@/components/ui/CalendarEvent";
 import WorkingList from "./WorkingList";
 import AddSchedule from "./AddSchedule";
 import { formatThaiDate } from "@/lib/utils/date-time";
-import { id } from "zod/v4/locales";
 
 export default function SchedulePage() {
     const today = new Date();
@@ -95,13 +94,42 @@ export default function SchedulePage() {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to authenticate');
+                throw new Error('Failed to delete schedule');
             }
 
             const data = await response.json()
-            console.log(data);
+            if (data.success) {
+                fetchSchedules(selectedDate)
+                fetchMonthSchedules(currentYear, currentMonth)
+            }
         } catch (error) {
-            
+            console.error(error);
+        }
+    }
+
+    const handleEdit = async (id: string, data: { work_date: string; employee_id: number }) => {
+        if (!id || id === "") return;
+
+        try {
+            const response = await fetch(`/api/schedule/${id}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to update schedule');
+            }
+
+            const result = await response.json()
+            if (result.success) {
+                fetchSchedules(selectedDate)
+                fetchMonthSchedules(currentYear, currentMonth)
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -157,6 +185,7 @@ export default function SchedulePage() {
                         <WorkingList
                             schedules={schedules}
                             onDelete={(id) => handleDelete(id)}
+                            onEdit={(id, data) => handleEdit(id, data)}
                         />
                     </div>
                 </div>

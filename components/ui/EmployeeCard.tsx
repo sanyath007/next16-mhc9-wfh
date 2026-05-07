@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import moment from "moment";
 import { MapPin, PhoneCall, Pencil, Trash2, X } from "lucide-react";
 import Modal from "./modals/index";
+import DatePicker from "./forms/DatePicker";
 
 interface Employee {
     id?: number;
@@ -18,11 +20,16 @@ interface Employee {
 }
 
 interface EmployeeCardProps {
-    id: string;
     employee: Employee;
+    schedule?: {
+        id: string;
+        work_date: string;
+        employee_id: number;
+    };
     color?: 'brand' | 'emerald' | 'amber' | 'rose';
     delay?: number;
     onDelete?: (id: string) => Promise<void>;
+    onEdit?: (id: string, data: { work_date: string; employee_id: number }) => Promise<void>;
 }
 
 const colors: Record<string, string> = {
@@ -33,26 +40,54 @@ const colors: Record<string, string> = {
 };
 
 export function EmployeeCard({
-    id,
     employee,
+    schedule,
     color = 'brand',
     delay = 0,
-    onDelete
+    onDelete,
+    onEdit
 }: EmployeeCardProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [showEditModal, setShowEditModal] = useState(false);
+    const [showConfirmModal, setShowConfirmModal] = useState(false);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editData, setEditData] = useState({
+        id: schedule?.id || '',
+        work_date: schedule?.work_date || '',
+        employee_id: schedule?.employee_id || 0
+    });
 
     const handleDelete = async () => {
-        if (!employee || !onDelete) return;
+        if (!schedule || !onDelete) return;
 
         setIsDeleting(true);
         try {
-            await onDelete(id);
+            await onDelete(schedule.id);
             setShowDeleteModal(false);
         } catch (error) {
             console.error('Delete error:', error);
         } finally {
             setIsDeleting(false);
+        }
+    };
+
+    const handleEditSubmit = () => {
+        setShowEditModal(false);
+        setShowConfirmModal(true);
+    };
+
+    const handleConfirmEdit = async () => {
+        if (!onEdit) return;
+
+        setIsEditing(true);
+        try {
+            await onEdit(editData.id, editData);
+            setShowConfirmModal(false);
+        } catch (error) {
+            console.error('Edit error:', error);
+        } finally {
+            setIsEditing(false);
         }
     };
 
@@ -95,7 +130,11 @@ export function EmployeeCard({
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 ml-auto">
-                    <button className="p-2 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors" title="แก้ไข">
+                    <button 
+                        className="p-2 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors" 
+                        title="แก้ไข"
+                        onClick={() => setShowEditModal(true)}
+                    >
                         <Pencil className="w-4 h-4" />
                     </button>
                     <button 
@@ -137,6 +176,89 @@ export function EmployeeCard({
                             className="flex-1 px-4 py-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             {isDeleting ? 'กำลังลบ...' : 'ลบ'}
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Edit Form Modal */}
+            <Modal isOpen={showEditModal} onClose={() => setShowEditModal(false)}>
+                <div className="card p-6 min-w-lg">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-800">แก้ไขตารางงาน</h3>
+                        <button 
+                            onClick={() => setShowEditModal(false)}
+                            className="p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                        >
+                            <X className="w-5 h-5 text-slate-500" />
+                        </button>
+                    </div>
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">วันที่</label>
+                            <DatePicker
+                                value={editData.work_date}
+                                onChange={(date) => setEditData({ ...editData, work_date: date })}
+                                inputCss="border-slate-200 hover:border-slate-300 hover:shadow-sm"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-slate-700 mb-1">บุคลากร</label>
+                            <p className="px-3 py-2 border border-slate-300 rounded-lg bg-slate-50 text-slate-700">
+                                {employee.name}
+                            </p>
+                        </div>
+                    </div>
+                    <div className="flex gap-3 mt-6">
+                        <button 
+                            onClick={() => setShowEditModal(false)}
+                            className="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                            ยกเลิก
+                        </button>
+                        <button 
+                            onClick={handleEditSubmit}
+                            className="flex-1 px-4 py-2 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition-colors"
+                        >
+                            ต่อไป
+                        </button>
+                    </div>
+                </div>
+            </Modal>
+
+            {/* Edit Confirmation Modal */}
+            <Modal isOpen={showConfirmModal} onClose={() => setShowConfirmModal(false)}>
+                <div className="card p-6 max-w-sm w-full">
+                    <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-lg font-semibold text-slate-800">ยืนยันการแก้ไข</h3>
+                        <button 
+                            onClick={() => setShowConfirmModal(false)}
+                            className="p-1 rounded-lg hover:bg-slate-100 transition-colors"
+                        >
+                            <X className="w-5 h-5 text-slate-500" />
+                        </button>
+                    </div>
+                    <p className="text-slate-600 mb-4">
+                        คุณต้องการแก้ไขตารางงานของ <span className="font-semibold text-slate-800">{employee.name}</span> หรือไม่?
+                    </p>
+                    <div className="bg-slate-50 rounded-lg p-3 mb-4">
+                        <p className="text-sm text-slate-600">
+                            วันที่: <span className="font-medium text-slate-800">{moment(editData.work_date).format('DD MMMM YYYY')}</span>
+                        </p>
+                    </div>
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={() => setShowConfirmModal(false)}
+                            className="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
+                        >
+                            ยกเลิก
+                        </button>
+                        <button 
+                            onClick={handleConfirmEdit}
+                            disabled={isEditing}
+                            className="flex-1 px-4 py-2 rounded-lg bg-brand-500 text-white hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isEditing ? 'กำลังบันทึก...' : 'ยืนยัน'}
                         </button>
                     </div>
                 </div>

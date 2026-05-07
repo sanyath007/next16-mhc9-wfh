@@ -5,7 +5,7 @@ import { useMemo } from "react";
 import { EmployeeCard } from "@/components/ui";
 import { useWorkings } from "@/lib/hooks/useWorking";
 
-const WorkingList = ({ schedules, onDelete }: { schedules: any[] | null, onDelete?: (id: string) => Promise<void> }) => {
+const WorkingList = ({ schedules, onDelete, onEdit }: { schedules: any[] | null, onDelete?: (id: string) => Promise<void>, onEdit?: (id: string, data: { work_date: string; employee_id: number }) => Promise<void> }) => {
     const { data: session } = useSession()
     const { data: employees } = useWorkings({ schedules: schedules })
 
@@ -13,7 +13,7 @@ const WorkingList = ({ schedules, onDelete }: { schedules: any[] | null, onDelet
         return employees?.map(employee => {
             const schedule = schedules?.find(s => s.employee_id === employee.id)
             return { ...employee, ...schedule }
-    })
+        })
     }, [schedules, employees])
 
     return (
@@ -21,7 +21,6 @@ const WorkingList = ({ schedules, onDelete }: { schedules: any[] | null, onDelet
             {employeeWorkings && employeeWorkings.map((e: any, i: number) => (
                 <EmployeeCard
                     key={e.id}
-                    id={e.id}
                     employee={{
                         id: e.employee_id,
                         name: `${e.firstname} ${e.lastname}`,
@@ -31,9 +30,15 @@ const WorkingList = ({ schedules, onDelete }: { schedules: any[] | null, onDelet
                         address: { district: e.amphur?.name, province: e.changwat?.name },
                         tasks: ['ติดตามผลการดำเนินงาน', 'ประสานงานกับโรงเรียน', 'รายงานสรุป']
                     }}
+                    schedule={{
+                        id: e.id,
+                        work_date: e.work_date,
+                        employee_id: e.employee_id
+                    }}
                     color="brand"
                     delay={100}
-                    onDelete={onDelete!}
+                    onDelete={onDelete}
+                    onEdit={onEdit}
                 />
             ))}
         </>
