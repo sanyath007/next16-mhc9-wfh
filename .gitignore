@@ -30,3 +30,7 @@ next-env.d.ts
 /lib/generated/prisma
 
 ecosystem.config.js
+
+# AI agent configuration
+.agents/
+skills-lock.json
