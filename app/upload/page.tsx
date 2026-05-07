@@ -3,19 +3,20 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
 import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X } from 'lucide-react'
+import moment from 'moment'
+import TagInput from '@/components/ui/forms/TagInput'
 
 interface UploadRecord {
     id: string
     filename: string
     uploaded_at: string
-    row_count: number
-    year: number
-    user: { name: string; email: string }
+    schedule: { work_date: string; employee: { firstname: string; lastname: string } }
 }
 
 export default function UploadPage() {
     const { data: session } = useSession()
     const userRole = (session?.user as { role?: string })?.role
+    const userId = (session?.user as { id?: number })?.id
     const fileRef = useRef<HTMLInputElement>(null)
 
     const [dragging, setDragging] = useState(false)
@@ -23,6 +24,8 @@ export default function UploadPage() {
     const [uploading, setUploading] = useState(false)
     const [result, setResult] = useState<{ success?: boolean; message?: string; rowCount?: number } | null>(null)
     const [history, setHistory] = useState<UploadRecord[]>([])
+    const [selectedSchedules, setSelectedSchedules] = useState<string[]>([])
+    const [scheduleOptions, setScheduleOptions] = useState<{ value: string; label: string }[]>([])
 
     const fetchHistory = async () => {
         try {
@@ -33,6 +36,26 @@ export default function UploadPage() {
     }
 
     useEffect(() => { fetchHistory() }, [])
+
+    const fetchUserSchedules = useCallback(async () => {
+        if (!userId) return
+        try {
+            const today = moment()
+            const startDate = today.clone().subtract(7, 'days').format('YYYY-MM-DD')
+            const endDate = today.clone().add(7, 'days').format('YYYY-MM-DD')
+            const res = await fetch(`/api/schedule?employee_id=${userId}&start_date=${startDate}&end_date=${endDate}`)
+            const json = await res.json()
+            const options = json.map((s: any) => ({
+                value: s.id,
+                label: moment(s.work_date).locale('th').format('D MMMM') + ' ' + (moment(s.work_date).year() + 543)
+            }))
+            setScheduleOptions(options)
+        } catch {}
+    }, [userId])
+
+    useEffect(() => {
+        if (userId) fetchUserSchedules()
+    }, [userId])
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault()
@@ -54,13 +77,13 @@ export default function UploadPage() {
     }
 
     const handleUpload = async () => {
-        if (!file) return
+        if (!file || selectedSchedules.length === 0) return
         setUploading(true)
         setResult(null)
 
         const formData = new FormData()
         formData.append('file', file)
-        formData.append('work_date', new Date().toISOString())
+        formData.append('schedule_ids', JSON.stringify(selectedSchedules))
 
         try {
             const res = await fetch('/api/upload', { method: 'POST', body: formData })
@@ -69,6 +92,7 @@ export default function UploadPage() {
             if (res.ok) {
                 setResult({ success: true, message: 'อัปโหลดสำเร็จ', rowCount: json.rowCount })
                 setFile(null)
+                setSelectedSchedules([])
                 fetchHistory()
             } else {
                 setResult({ success: false, message: json.error || 'เกิดข้อผิดพลาด' })
@@ -83,7 +107,7 @@ export default function UploadPage() {
     const isReadOnly = userRole === 'VIEWER'
 
     return (
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-6">
             {/* Page Header */}
             <div>
                 <h1 className="font-display text-2xl font-bold text-slate-900">อัปโหลดรายงาน</h1>
@@ -100,6 +124,22 @@ export default function UploadPage() {
 
             {/* Upload zone */}
             <div className="card p-8 space-y-6">
+                {/* Schedule Selection */}
+                {!isReadOnly && (
+                    <div className="space-y-3">
+                        <div>
+                            <h3 className="font-semibold text-slate-800">เลือกตารางงาน</h3>
+                            <p className="text-sm text-slate-500">เลือกวันที่คุณมีตาราง Work From Home ที่ต้องการอัปโหลดรายงาน</p>
+                        </div>
+                        <TagInput
+                            options={scheduleOptions}
+                            value={selectedSchedules}
+                            onChange={setSelectedSchedules}
+                            placeholder="เลือกวันที่ Work From Home..."
+                        />
+                    </div>
+                )}
+
                 <div
                     onDragOver={e => { e.preventDefault(); setDragging(true) }}
                     onDragLeave={() => setDragging(false)}
@@ -188,7 +228,7 @@ export default function UploadPage() {
 
                 <button
                     onClick={handleUpload}
-                    disabled={!file || uploading || isReadOnly}
+                    disabled={!file || selectedSchedules.length === 0 || uploading || isReadOnly}
                     className="btn-primary w-full py-4 text-lg font-bold shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {uploading ? (
@@ -218,9 +258,9 @@ export default function UploadPage() {
                                     <FileText className="w-4 h-4 text-brand-600" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="font-medium text-slate-800 text-sm truncate">{upload.filename} ปีงบประมาณ {upload.year+543}</p>
+                                    <p className="font-medium text-slate-800 text-sm truncate">{upload.filename}</p>
                                     <p className="text-xs text-slate-500 mt-0.5">
-                                        โดย {/* {upload.user.name || upload.user.email} · {upload.row_count.toLocaleString()} แถว */}
+                                        โดย {upload.schedule?.employee?.firstname}
                                     </p>
                                 </div>
                                 <div className="text-right shrink-0">

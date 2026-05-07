@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
             data: {
                 work_date: new Date(work_date),
                 employee_id,
-                report_file: '',
+                reported: 0,
                 created_by: parseInt(userWithRole.id.toString())
             },
         })
@@ -47,6 +47,7 @@ export async function GET(req: NextRequest) {
     const date = searchParams.get("date")
     const startDate = searchParams.get("start_date")
     const endDate = searchParams.get("end_date")
+    const employeeId = searchParams.get("employee_id")
 
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -63,8 +64,24 @@ export async function GET(req: NextRequest) {
         }
     }
 
+    if (employeeId) {
+        whereClause.employee_id = parseInt(employeeId)
+    }
+
     const schedules = await prisma.schedule.findMany({
         where: whereClause,
+        include: {
+            employee: {
+                select: {
+                    id: true,
+                    firstname: true,
+                    lastname: true,
+                }
+            }
+        },
+        orderBy: {
+            work_date: 'desc'
+        }
     })
 
     return NextResponse.json(schedules)

@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
 
     const formData = await req.formData()
     const file = formData.get('file') as File
+    const scheduleIdsStr = formData.get('schedule_ids') as string
+    
     if (!file) {
         return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
@@ -24,21 +26,30 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Only PDF files are supported' }, { status: 400 })
     }
 
+    const scheduleIds = scheduleIdsStr ? JSON.parse(scheduleIdsStr) : []
+    if (!scheduleIds || scheduleIds.length === 0) {
+        return NextResponse.json({ error: 'No schedule selected' }, { status: 400 })
+    }
+
     try {
-        /** Create upload record */
-        const upload = await prisma.dataUpload.create({
-            data: {
-                filename: file.name,
-                work_date: new Date(formData.get('work_date') as string),
-                employee_id: userWithRole.employee_id,
-                year: 2026,
-                uploaded_by: userWithRole.id
-            },
-        })
+        for (const scheduleId of scheduleIds) {
+            await prisma.dataUpload.create({
+                data: {
+                    filename: file.name,
+                    schedule_id: scheduleId,
+                    uploaded_by: parseInt(userWithRole.id.toString())
+                },
+            })
+
+            await prisma.schedule.update({
+                where: { id: scheduleId },
+                data: { reported: 1 }
+            })
+        }
 
         return NextResponse.json({
             success: true,
-            uploadId: upload.id
+            uploadCount: scheduleIds.length
         })
     } catch (error) {
         console.error('Upload error:', error)
@@ -57,6 +68,13 @@ export async function GET() {
     }
 
     const uploads = await prisma.dataUpload.findMany({
+        include: {
+            schedule: {
+                include: {
+                    employee: true
+                }
+            }
+        },
         orderBy: { uploaded_at: 'desc' },
         take: 20,
     })
