@@ -69,3 +69,32 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json(schedules)
 }
+
+export async function DELETE(req: NextRequest) {
+    const session = await auth()
+
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const userWithRole = session?.user as { id: number, role: string }
+    if (userWithRole.role === 'VIEWER') {
+        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const { id } = await req.json()
+
+    try {
+        await prisma.schedule.delete({
+            where: { id },
+        })
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Delete error:', error)
+        return NextResponse.json(
+            { error: 'Failed to delete schedule', details: error instanceof Error ? error.message : 'Unknown error' },
+            { status: 500 }
+        )
+    }
+}
