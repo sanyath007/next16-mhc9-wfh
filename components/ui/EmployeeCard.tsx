@@ -243,7 +243,9 @@ export function EmployeeCard({
                     </p>
                     <div className="bg-slate-50 rounded-lg p-3 mb-4">
                         <p className="text-sm text-slate-600">
-                            วันที่: <span className="font-medium text-slate-800">{moment(editData.work_date).format('DD MMMM YYYY')}</span>
+                            วันที่: <span className="font-medium text-slate-800">
+                                {moment(editData.work_date).locale('th').format('D MMMM') + ' ' + (moment(editData.work_date).year() + 543)}
+                            </span>
                         </p>
                     </div>
                     <div className="flex gap-3">

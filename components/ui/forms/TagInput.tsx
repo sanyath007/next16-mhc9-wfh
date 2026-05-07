@@ -123,7 +123,7 @@ const TagInput: React.FC<TagInputProps> = ({
 
             {/* Dropdown Options */}
             {isOpen && (filteredOptions.length > 0 || inputValue.trim()) && (
-                <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="absolute z-9999 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
                     <div className="max-h-60 overflow-y-auto py-1">
                         {filteredOptions.map((option) => (
                             <button

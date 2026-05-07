@@ -35,25 +35,24 @@ model Schedule {
   id          String    @id @default(cuid())
   work_date   DateTime  @db.Date
   employee_id Int
-  report_file String
+  reported    Int
   created_by  Int
   created_at  DateTime  @default(now())
 
   employee   Employee   @relation(fields: [employee_id], references: [id], map: "schedule_employee_ibfk_1")
+  uploads    DataUpload[]
 
   @@map("schedules")
 }
 
 model DataUpload {
   id          String    @id @default(cuid())
+  schedule_id String
   filename    String
-  work_date   DateTime  @db.Date
-  year        Int
-  employee_id Int
   uploaded_by Int
   uploaded_at DateTime  @default(now())
 
-  employee   Employee                   @relation(fields: [employee_id], references: [id], map: "datau_upload_employee_ibfk_1")
+  schedule   Schedule @relation(fields: [schedule_id], references: [id], map: "data_upload_schedule_ibfk_1")
 
   @@map("data_uploads")
 }
@@ -167,7 +166,6 @@ model Employee {
   tambon          Tambon?                      @relation(fields: [tambon_id], references: [id], map: "employee_tambon_ibfk_1")
 
   schedules       Schedule[]
-  data_uploads    DataUpload[]
   members         Member[]
   
   @@map("employees")
