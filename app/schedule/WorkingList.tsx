@@ -1,20 +1,29 @@
 "use client"
 
 import { useSession } from "next-auth/react";
-import { useCallback, useEffect, useState } from "react";
+import { useMemo } from "react";
 import { EmployeeCard } from "@/components/ui";
 import { useWorkings } from "@/lib/hooks/useWorking";
 
-const WorkingList = ({ schedules }: { schedules: any[] | null }) => {
+const WorkingList = ({ schedules, onDelete }: { schedules: any[] | null, onDelete?: (id: string) => Promise<void> }) => {
     const { data: session } = useSession()
     const { data: employees } = useWorkings({ schedules: schedules })
 
+    const employeeWorkings = useMemo(() => {
+        return employees?.map(employee => {
+            const schedule = schedules?.find(s => s.employee_id === employee.id)
+            return { ...employee, ...schedule }
+    })
+    }, [schedules, employees])
+
     return (
         <>
-            {employees && employees.map((e: any, i: number) => (
+            {employeeWorkings && employeeWorkings.map((e: any, i: number) => (
                 <EmployeeCard
                     key={e.id}
+                    id={e.id}
                     employee={{
+                        id: e.employee_id,
                         name: `${e.firstname} ${e.lastname}`,
                         position: `${e.position?.name}${e.level ? e.level?.name : ''}`,
                         phone: e.tel,
@@ -24,6 +33,7 @@ const WorkingList = ({ schedules }: { schedules: any[] | null }) => {
                     }}
                     color="brand"
                     delay={100}
+                    onDelete={onDelete!}
                 />
             ))}
         </>

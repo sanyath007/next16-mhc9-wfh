@@ -37,9 +37,9 @@ model Schedule {
   employee_id Int
   report_file String
   created_by  Int
-  created_at  DateTime   @default(now())
+  created_at  DateTime  @default(now())
 
-  employee   Employee                   @relation(fields: [employee_id], references: [id], map: "schedule_employee_ibfk_1")
+  employee   Employee   @relation(fields: [employee_id], references: [id], map: "schedule_employee_ibfk_1")
 
   @@map("schedules")
 }

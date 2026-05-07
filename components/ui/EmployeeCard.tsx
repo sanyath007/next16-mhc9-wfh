@@ -18,10 +18,11 @@ interface Employee {
 }
 
 interface EmployeeCardProps {
+    id: string;
     employee: Employee;
     color?: 'brand' | 'emerald' | 'amber' | 'rose';
     delay?: number;
-    onDelete?: (id: number) => Promise<void>;
+    onDelete?: (id: string) => Promise<void>;
 }
 
 const colors: Record<string, string> = {
@@ -32,6 +33,7 @@ const colors: Record<string, string> = {
 };
 
 export function EmployeeCard({
+    id,
     employee,
     color = 'brand',
     delay = 0,
@@ -41,11 +43,11 @@ export function EmployeeCard({
     const [isDeleting, setIsDeleting] = useState(false);
 
     const handleDelete = async () => {
-        if (!employee.id || !onDelete) return;
+        if (!employee || !onDelete) return;
 
         setIsDeleting(true);
         try {
-            await onDelete(employee.id);
+            await onDelete(id);
             setShowDeleteModal(false);
         } catch (error) {
             console.error('Delete error:', error);
@@ -62,7 +64,7 @@ export function EmployeeCard({
             >
                 {/* Employee Info */}
                 <div>
-                    <div className="flex max-md:flex-col items-center gap-3">
+                    <div className="flex items-center gap-3">
                         {/* Avatar */}
                         <div className="relative">
                             <img

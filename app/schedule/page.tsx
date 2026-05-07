@@ -6,6 +6,7 @@ import Calendar from "@/components/ui/CalendarEvent";
 import WorkingList from "./WorkingList";
 import AddSchedule from "./AddSchedule";
 import { formatThaiDate } from "@/lib/utils/date-time";
+import { id } from "zod/v4/locales";
 
 export default function SchedulePage() {
     const today = new Date();
@@ -82,6 +83,28 @@ export default function SchedulePage() {
         fetchMonthSchedules(currentYear, currentMonth)
     }, [currentYear, currentMonth, schedules])
 
+    const handleDelete = async (id: string) => {
+        if (!id || id === "") return;
+
+        try {
+            const response = await fetch(`/api/schedule/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to authenticate');
+            }
+
+            const data = await response.json()
+            console.log(data);
+        } catch (error) {
+            
+        }
+    }
+
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -131,7 +154,10 @@ export default function SchedulePage() {
                         <span className="text-sm text-slate-400">ประจำวันที่ {formatThaiDate(selectedDate)}</span>
                     </div>
                     <div className="grid grid-cols-1 gap-4">
-                        <WorkingList schedules={schedules} />
+                        <WorkingList
+                            schedules={schedules}
+                            onDelete={(id) => handleDelete(id)}
+                        />
                     </div>
                 </div>
             </div>
