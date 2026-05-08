@@ -150,8 +150,8 @@ export default function DashboardPage() {
         return ['อำนวยการ','วิชาการสุขภาพจิต','บริการสุขภาพจิต'].map(dep => ({
             name:   dep,
             office: {
-                count:  offices?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep)).length,
-                lists:  offices?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep))
+                count:  offices?.filter((e: any) => (e.members[0]?.department?.name as string)?.includes(dep)).length,
+                lists:  offices?.filter((e: any) => (e.members[0]?.department?.name as string)?.includes(dep))
             },
             wfh: {
                 count:  workings?.filter((w: any) => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
@@ -174,8 +174,8 @@ export default function DashboardPage() {
                         )
             },
             total: {
-                count:  employees?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep)).length,
-                lists:  employees?.filter((e: any) => (e.members[0]?.department?.name as string).includes(dep))
+                count:  employees?.filter((e: any) => (e.members[0]?.department?.name as string)?.includes(dep)).length,
+                lists:  employees?.filter((e: any) => (e.members[0]?.department?.name as string)?.includes(dep))
             }
         }))
     }, [selectedDate, selectedDep, offices, workings, leaves, trips])
