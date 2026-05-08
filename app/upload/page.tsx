@@ -43,7 +43,7 @@ export default function UploadPage() {
             const today = moment()
             const startDate = today.clone().subtract(7, 'days').format('YYYY-MM-DD')
             const endDate = today.clone().add(7, 'days').format('YYYY-MM-DD')
-            const res = await fetch(`/api/schedule?employee_id=${userId}&start_date=${startDate}&end_date=${endDate}`)
+            const res = await fetch(`/api/schedule?employee_id=${userId}&start_date=${startDate}&end_date=${endDate}&reported=0`)
             const json = await res.json()
             const options = json.map((s: any) => ({
                 value: s.id,

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    
+
     const userWithRole = session?.user as { id: number, role: string }
     if (userWithRole.role === 'VIEWER') {
         return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
@@ -48,6 +48,7 @@ export async function GET(req: NextRequest) {
     const startDate = searchParams.get("start_date")
     const endDate = searchParams.get("end_date")
     const employeeId = searchParams.get("employee_id")
+    const reported = searchParams.get("reported")
 
     if (!session?.user) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -66,6 +67,10 @@ export async function GET(req: NextRequest) {
 
     if (employeeId) {
         whereClause.employee_id = parseInt(employeeId)
+    }
+
+    if (reported !== null && reported !== undefined) {
+        whereClause.reported = parseInt(reported)
     }
 
     const schedules = await prisma.schedule.findMany({
