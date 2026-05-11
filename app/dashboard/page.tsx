@@ -165,14 +165,14 @@ export default function DashboardPage() {
                 lists:  offices?.filter((e: any) => (e.members[0]?.department?.name as string)?.includes(dep))
             },
             wfh: {
-                count:  workings?.filter((w: any) => (w.members[0]?.department?.name as string).includes(dep)).length || 0,
-                lists:  workings?.filter((w: any) => (w.members[0]?.department?.name as string).includes(dep))
+                count:  workings?.filter((w: any) => (w.members[0]?.department?.name as string)?.includes(dep)).length || 0,
+                lists:  workings?.filter((w: any) => (w.members[0]?.department?.name as string)?.includes(dep))
             },
             leave: {
-                count:  leaves.filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string).includes(dep)).length,
+                count:  leaves.filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string)?.includes(dep)).length,
                 lists:  employees?.filter((e: any) => 
                             leaves
-                                .filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string).includes(dep))
+                                .filter((l: any) => l.type !== 'ชั่วโมง' && (l.employee?.department?.name as string)?.includes(dep))
                                 .some(l => l.employee?.id === parseInt(e.employee_no))
                         )
             },
