@@ -9,11 +9,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
     
-    const userWithRole = session?.user as { id: number, role: string, employee_id: number }
-    if (userWithRole.role === 'VIEWER') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
+    const user = session.user as any
     const formData = await req.formData()
     const file = formData.get('file') as File
     const scheduleIdsStr = formData.get('schedule_ids') as string
@@ -32,12 +28,26 @@ export async function POST(req: NextRequest) {
     }
 
     try {
+        // Ownership check for non-privileged users
+        if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
+            const ownedSchedules = await prisma.schedule.count({
+                where: {
+                    id: { in: scheduleIds },
+                    employee_id: parseInt(user.employee_id.toString())
+                }
+            })
+
+            if (ownedSchedules !== scheduleIds.length) {
+                return NextResponse.json({ error: 'Forbidden: You can only upload reports for your own schedules' }, { status: 403 })
+            }
+        }
+
         for (const scheduleId of scheduleIds) {
             await prisma.dataUpload.create({
                 data: {
                     filename: file.name,
                     schedule_id: scheduleId,
-                    uploaded_by: parseInt(userWithRole.id.toString())
+                    uploaded_by: parseInt(user.id.toString())
                 },
             })
 
@@ -67,7 +77,16 @@ export async function GET() {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
+    const user = session.user as any
+    const where: any = {}
+
+    // Filter by owner if not ADMIN or EDITOR
+    if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
+        where.uploaded_by = parseInt(user.id.toString())
+    }
+
     const uploads = await prisma.dataUpload.findMany({
+        where,
         include: {
             schedule: {
                 include: {

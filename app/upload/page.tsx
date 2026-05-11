@@ -104,8 +104,6 @@ export default function UploadPage() {
         }
     }
 
-    const isReadOnly = userRole === 'VIEWER'
-
     return (
         <div className="max-w-3xl mx-auto space-y-6">
             {/* Page Header */}
@@ -114,45 +112,33 @@ export default function UploadPage() {
                 <p className="text-slate-500 mt-1 text-sm">นำเข้าไฟล์ PDF เพื่อส่งรายงานการ Work From Home</p>
             </div>
 
-            {/* Viewer role message */}
-            {isReadOnly && (
-                <div className="flex items-center gap-3 p-5 bg-amber-500/10 backdrop-blur-md border border-amber-500/20 rounded-2xl text-amber-700 text-sm font-bold animate-fadeInUp">
-                    <AlertCircle className="w-5 h-5 shrink-0" />
-                    คุณมีสิทธิ์ Viewer ไม่สามารถอัปโหลดข้อมูลได้
-                </div>
-            )}
-
             {/* Upload zone */}
             <div className="card p-8 space-y-6">
                 {/* Schedule Selection */}
-                {!isReadOnly && (
-                    <div className="space-y-3">
-                        <div>
-                            <h3 className="font-semibold text-slate-800">เลือกตารางงาน</h3>
-                            <p className="text-sm text-slate-500">เลือกวันที่คุณมีตาราง Work From Home ที่ต้องการอัปโหลดรายงาน</p>
-                        </div>
-                        <TagInput
-                            options={scheduleOptions}
-                            value={selectedSchedules}
-                            onChange={setSelectedSchedules}
-                            placeholder="เลือกวันที่ Work From Home..."
-                        />
+                <div className="space-y-3">
+                    <div>
+                        <h3 className="font-semibold text-slate-800">เลือกตารางงาน</h3>
+                        <p className="text-sm text-slate-500">เลือกวันที่คุณมีตาราง Work From Home ที่ต้องการอัปโหลดรายงาน</p>
                     </div>
-                )}
+                    <TagInput
+                        options={scheduleOptions}
+                        value={selectedSchedules}
+                        onChange={setSelectedSchedules}
+                        placeholder="เลือกวันที่ Work From Home..."
+                    />
+                </div>
 
                 <div
                     onDragOver={e => { e.preventDefault(); setDragging(true) }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={handleDrop}
-                    onClick={() => !isReadOnly && fileRef.current?.click()}
+                    onClick={() => fileRef.current?.click()}
                     className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-300 cursor-pointer overflow-hidden ${
-                        isReadOnly
-                            ? 'border-slate-200 bg-slate-100/30 opacity-60 cursor-not-allowed'
-                            : dragging
-                                ? 'border-brand-500 bg-brand-500/5 scale-[1.02] shadow-2xl shadow-brand-500/10'
-                                : file
-                                    ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10'
-                                    : 'border-slate-200 bg-white/30 hover:border-brand-400 hover:bg-brand-500/5 hover:shadow-xl hover:shadow-brand-500/5'
+                        dragging
+                            ? 'border-brand-500 bg-brand-500/5 scale-[1.02] shadow-2xl shadow-brand-500/10'
+                            : file
+                                ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10'
+                                : 'border-slate-200 bg-white/30 hover:border-brand-400 hover:bg-brand-500/5 hover:shadow-xl hover:shadow-brand-500/5'
                     }`}
                 >
                     <input
@@ -161,7 +147,6 @@ export default function UploadPage() {
                         accept="application/pdf"
                         onChange={handleFile}
                         className="hidden"
-                        disabled={isReadOnly}
                     />
                     
                     {/* Decorative blobs inside dropzone */}
@@ -228,7 +213,7 @@ export default function UploadPage() {
 
                 <button
                     onClick={handleUpload}
-                    disabled={!file || selectedSchedules.length === 0 || uploading || isReadOnly}
+                    disabled={!file || selectedSchedules.length === 0 || uploading}
                     className="btn-primary w-full py-4 text-lg font-bold shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {uploading ? (
