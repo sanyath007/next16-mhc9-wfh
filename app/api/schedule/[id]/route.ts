@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
 
+import moment from 'moment'
+
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }>}) {
     const session = await auth()
 
@@ -22,10 +24,15 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
             return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
         }
 
-        // Role check: If not ADMIN or EDITOR, must be owner
+        // Role check: If not ADMIN or EDITOR, must be owner and NOT past
         if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
             if (parseInt(existingSchedule.employee_id.toString()) !== parseInt(user.employee_id.toString())) {
                 return NextResponse.json({ error: 'Forbidden: Can only edit your own schedule' }, { status: 403 })
+            }
+
+            const isPast = moment(existingSchedule.work_date).isBefore(moment(), 'day')
+            if (isPast) {
+                return NextResponse.json({ error: 'Forbidden: Cannot edit past schedules' }, { status: 403 })
             }
         }
 
@@ -66,10 +73,15 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
             return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
         }
 
-        // Role check: If not ADMIN or EDITOR, must be owner
+        // Role check: If not ADMIN or EDITOR, must be owner and NOT past
         if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
             if (parseInt(existingSchedule.employee_id.toString()) !== parseInt(user.employee_id.toString())) {
                 return NextResponse.json({ error: 'Forbidden: Can only delete your own schedule' }, { status: 403 })
+            }
+
+            const isPast = moment(existingSchedule.work_date).isBefore(moment(), 'day')
+            if (isPast) {
+                return NextResponse.json({ error: 'Forbidden: Cannot cancel past schedules' }, { status: 403 })
             }
         }
 

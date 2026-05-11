@@ -155,7 +155,7 @@ export function EmployeeCard({
             <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
                 <div className="card p-6 max-w-sm w-full">
                     <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg font-semibold text-slate-800">ยืนยันการลบ</h3>
+                        <h3 className="text-lg font-semibold text-slate-800">ยืนยันการยกเลิก</h3>
                         <button 
                             onClick={() => setShowDeleteModal(false)}
                             className="p-1 rounded-lg hover:bg-slate-100 transition-colors"
@@ -163,23 +163,31 @@ export function EmployeeCard({
                             <X className="w-5 h-5 text-slate-500" />
                         </button>
                     </div>
-                    <p className="text-slate-600 mb-6">
-                        คุณต้องการลบรายการ Work from home<br />
-                        ของ <span className="font-semibold text-slate-800">{employee.name}</span> หรือไม่?
-                    </p>
+                    <div className="space-y-3 mb-6">
+                        <p className="text-slate-600">
+                            คุณต้องการยกเลิกรายการ Work from home ของคุณหรือไม่?
+                        </p>
+                        <div className="bg-slate-50 rounded-xl p-4 border border-slate-100">
+                            <div className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-1">รายละเอียด</div>
+                            <div className="text-slate-700 font-medium">{employee.name}</div>
+                            <div className="text-slate-500 text-sm mt-1">
+                                วันที่: {moment(schedule?.work_date).locale('th').format('D MMMM') + ' ' + (moment(schedule?.work_date).year() + 543)}
+                            </div>
+                        </div>
+                    </div>
                     <div className="flex gap-3">
                         <button 
                             onClick={() => setShowDeleteModal(false)}
                             className="flex-1 px-4 py-2 rounded-lg border border-slate-300 text-slate-700 hover:bg-slate-50 transition-colors"
                         >
-                            ยกเลิก
+                            ปิด
                         </button>
                         <button 
                             onClick={handleDelete}
                             disabled={isDeleting}
                             className="flex-1 px-4 py-2 rounded-lg bg-rose-500 text-white hover:bg-rose-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                            {isDeleting ? 'กำลังลบ...' : 'ลบ'}
+                            {isDeleting ? 'กำลังยกเลิก...' : 'ยืนยันการยกเลิก'}
                         </button>
                     </div>
                 </div>

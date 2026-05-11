@@ -1,5 +1,6 @@
 "use client"
 
+import moment from "moment";
 import { useSession } from "next-auth/react";
 import { useMemo } from "react";
 import { EmployeeCard } from "@/components/ui";
@@ -23,7 +24,11 @@ const WorkingList = ({ schedules, onDelete, onEdit }: { schedules: any[] | null,
         <>
             {employeeWorkings && employeeWorkings.map((e: any, i: number) => {
                 const isOwner = parseInt(e.employee_id?.toString()) === parseInt(user?.employee_id?.toString())
-                const canManage = isAdminOrHR || isOwner
+                
+                // Logic: Only admin/HR or owner can manage. 
+                // Owners can only manage (cancel/edit) their own schedules if they are NOT in the past.
+                const isPast = moment(e.work_date).isBefore(moment(), 'day')
+                const canManage = isAdminOrHR || (isOwner && !isPast)
 
                 return (
                     <EmployeeCard
