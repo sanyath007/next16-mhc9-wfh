@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
+import { writeFile, mkdir } from 'fs/promises'
+import { existsSync } from 'fs'
+import path from 'path'
 
 export async function POST(req: NextRequest) {
     const session = await auth()
@@ -42,10 +45,23 @@ export async function POST(req: NextRequest) {
             }
         }
 
+        // Ensure uploads directory exists
+        const uploadsDir = path.join(process.cwd(), 'public', 'uploads')
+        if (!existsSync(uploadsDir)) {
+            await mkdir(uploadsDir, { recursive: true })
+        }
+
+        // Convert file to buffer and save with unique name
+        const bytes = await file.arrayBuffer()
+        const buffer = Buffer.from(bytes)
+        const uniqueFilename = `${Date.now()}-${file.name}`
+        const filePath = path.join(uploadsDir, uniqueFilename)
+        await writeFile(filePath, buffer)
+
         for (const scheduleId of scheduleIds) {
             await prisma.dataUpload.create({
                 data: {
-                    filename: file.name,
+                    filename: uniqueFilename,
                     schedule_id: scheduleId,
                     uploaded_by: parseInt(user.id.toString())
                 },

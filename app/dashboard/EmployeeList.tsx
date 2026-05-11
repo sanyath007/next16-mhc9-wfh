@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSession } from 'next-auth/react'
-import { NotepadText } from 'lucide-react'
+import { NotepadText, Download } from 'lucide-react'
 import { cn } from '@/lib/utils/tailwindcss'
 
 const EmployeeList = (
@@ -15,6 +15,20 @@ const EmployeeList = (
 
         return ['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน']
     }, [isReport])
+
+    const handleDownload = async (scheduleId: string) => {
+        try {
+            const response = await fetch(`/api/upload/download?schedule_id=${scheduleId}`)
+            if (response.ok) {
+                const data = await response.json()
+                if (data.filename) {
+                    window.open(`/uploads/${data.filename}`, '_blank')
+                }
+            }
+        } catch (error) {
+            console.error('Download error:', error)
+        }
+    }
 
     return (
         <div className="card overflow-hidden">
@@ -61,10 +75,25 @@ const EmployeeList = (
                                     {employee.members[0]?.department?.name}
                                 </td>
                                 {isReport && <td className="px-5 py-2 text-center">
-                                    {/* <ProgressBar value={p.studentCompleted} max={p.studentRequested} /> */}
-                                    <button type="button" className="text-emerald-500 cursor-pointer">
-                                        <NotepadText className="w-6 h-6" />
-                                    </button>
+                                    {employee.reported === 1 ? (
+                                        <button 
+                                            type="button" 
+                                            className="text-emerald-500 hover:text-emerald-700 cursor-pointer transition-colors"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                                if (employee.schedule_id) {
+                                                    handleDownload(employee.schedule_id)
+                                                }
+                                            }}
+                                            title="ดาวน์โหลดรายงาน"
+                                        >
+                                            <Download className="w-5 h-5" />
+                                        </button>
+                                    ) : (
+                                        <div className="text-slate-300 flex justify-center">
+                                            <NotepadText className="w-5 h-5" />
+                                        </div>
+                                    )}
                                 </td>}
                             </tr>
                         ))}

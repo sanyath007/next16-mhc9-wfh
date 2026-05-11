@@ -59,7 +59,18 @@ export function useWorkings ({ schedules, dep = '' }: { schedules: any[] | null,
             }
 
             const employees = await response.json()
-            setData(employees.filter((e: any) => schedules && schedules.some(s => s.employee_id === e.id)))
+            const filteredEmployees = employees.filter((e: any) => schedules && schedules.some(s => s.employee_id === e.id))
+            
+            const workingsWithSchedule = filteredEmployees.map((e: any) => {
+                const schedule = schedules?.find((s: any) => s.employee_id === e.id)
+                return {
+                    ...e,
+                    schedule_id: schedule?.id,
+                    reported: schedule?.reported || 0
+                }
+            })
+            
+            setData(workingsWithSchedule)
         } catch (error) {
             
         }

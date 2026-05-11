@@ -480,18 +480,20 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* Work from home employee table */}
+            {/* Work at office lists */}
             <EmployeeList
                 title="รายชื่อบุคลากรปฏิบัติงาน ณ สำนักงาน"
                 employees={!selectedDep ? offices : departments.find(dep => dep.name === selectedDep)?.office.lists}
             />
 
+            {/* Work from home lists */}
             <EmployeeList
                 title="รายชื่อบุคลากรปฏิบัติงาน Work from Home"
                 employees={!selectedDep ? workings : departments.find(dep => dep.name === selectedDep)?.wfh.lists}
                 isReport
             />
 
+            {/* Have business trip lists */}
             <EmployeeList
                 title="รายชื่อบุคลากรไปราชการ"
                 employees={!selectedDep
@@ -500,6 +502,7 @@ export default function DashboardPage() {
                 }
             />
 
+            {/* Have leave lists */}
             <EmployeeList
                 title="รายชื่อบุคลากรลา"
                 employees={!selectedDep
