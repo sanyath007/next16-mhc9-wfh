@@ -25,13 +25,13 @@ export default {
         // if (!user) return null
 
         // const passwordMatch = await bcrypt.compare(credentials.password as string, user.password)
-        // if (!passwordMatch) return null
+        // if (!passwordMatch) return
 
         return {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: user.role || 'ADMIN',
+          role: user.permissions[0]?.role_id === 1 ? 'ADMIN' : user.permissions[0]?.role_id === 7 ? 'EDITOR' : 'VIEWER',
           access_token: oauth.access_token, 
           employee_id: user.employee_id
         }
