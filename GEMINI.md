@@ -41,7 +41,10 @@ The application follows a **Modern Glassmorphism** design language:
 ## Key Features
 - **Interactive Dashboard:** High-level summary cards and detailed charts (Bar, Pie) with drill-down capabilities.
 - **Data Management:** Secure CSV upload for updating consulting records, with validation for required columns.
-- **Role-Based Access Control:** Three user roles (`ADMIN`, `EDITOR`, `VIEWER`) to manage permissions.
+- **Role-Based Access Control:** Tiered permission system for data security:
+    - **`ADMIN` / `EDITOR` (HR Officer):** Full management of all employee schedules and data uploads. Can manage records for any user without date restrictions.
+    - **`VIEWER` (Employee):** Can add their own schedules only. Can edit or cancel (delete) their own schedules only if the work date is **today or in the future**. Past records are locked to maintain reporting integrity.
+
 - **OCR Utility:** Capability to extract Thai and English text from scanned images and PDF documents.
 - **Location Hierarchy:** Comprehensive database of Thai Provinces, Districts, and Schools.
 
