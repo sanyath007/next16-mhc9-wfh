@@ -9,20 +9,24 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userWithRole = session?.user as { id: number, role: string }
-    if (userWithRole.role === 'VIEWER') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    const user = session.user as any
+    const { work_date, employee_id } = await req.json()
+
+    // Role check: If not ADMIN or EDITOR, must be creating for self
+    if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
+        if (parseInt(employee_id.toString()) !== parseInt(user.employee_id.toString())) {
+            return NextResponse.json({ error: 'Forbidden: Can only add schedule for yourself' }, { status: 403 })
+        }
     }
 
-    const { work_date, employee_id } = await req.json()
     try {
         /** Create upload record */
         const upload = await prisma.schedule.create({
             data: {
                 work_date: new Date(work_date),
-                employee_id,
+                employee_id: parseInt(employee_id.toString()),
                 reported: 0,
-                created_by: parseInt(userWithRole.id.toString())
+                created_by: parseInt(user.employee_id?.toString() || user.id?.toString())
             },
         })
 

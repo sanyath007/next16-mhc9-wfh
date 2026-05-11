@@ -9,6 +9,9 @@ const WorkingList = ({ schedules, onDelete, onEdit }: { schedules: any[] | null,
     const { data: session } = useSession()
     const { data: employees } = useWorkings({ schedules: schedules })
 
+    const user = session?.user as any
+    const isAdminOrHR = user?.role === 'ADMIN' || user?.role === 'EDITOR'
+
     const employeeWorkings = useMemo(() => {
         return employees?.map(employee => {
             const schedule = schedules?.find(s => s.employee_id === employee.id)
@@ -18,29 +21,34 @@ const WorkingList = ({ schedules, onDelete, onEdit }: { schedules: any[] | null,
 
     return (
         <>
-            {employeeWorkings && employeeWorkings.map((e: any, i: number) => (
-                <EmployeeCard
-                    key={e.id}
-                    employee={{
-                        id: e.employee_id,
-                        name: `${e.firstname} ${e.lastname}`,
-                        position: `${e.position?.name}${e.level ? e.level?.name : ''}`,
-                        phone: e.tel,
-                        email: e.email,
-                        address: { district: e.amphur?.name, province: e.changwat?.name },
-                        tasks: ['ติดตามผลการดำเนินงาน', 'ประสานงานกับโรงเรียน', 'รายงานสรุป']
-                    }}
-                    schedule={{
-                        id: e.id,
-                        work_date: e.work_date,
-                        employee_id: e.employee_id
-                    }}
-                    color="brand"
-                    delay={100}
-                    onDelete={onDelete}
-                    onEdit={onEdit}
-                />
-            ))}
+            {employeeWorkings && employeeWorkings.map((e: any, i: number) => {
+                const isOwner = parseInt(e.employee_id?.toString()) === parseInt(user?.employee_id?.toString())
+                const canManage = isAdminOrHR || isOwner
+
+                return (
+                    <EmployeeCard
+                        key={e.id || i}
+                        employee={{
+                            id: e.employee_id,
+                            name: `${e.firstname} ${e.lastname}`,
+                            position: `${e.position?.name}${e.level ? e.level?.name : ''}`,
+                            phone: e.tel,
+                            email: e.email,
+                            address: { district: e.amphur?.name, province: e.changwat?.name },
+                            tasks: ['ติดตามผลการดำเนินงาน', 'ประสานงานกับโรงเรียน', 'รายงานสรุป']
+                        }}
+                        schedule={{
+                            id: e.id,
+                            work_date: e.work_date,
+                            employee_id: e.employee_id
+                        }}
+                        color="brand"
+                        delay={100}
+                        onDelete={canManage ? onDelete : undefined}
+                        onEdit={canManage ? onEdit : undefined}
+                    />
+                )
+            })}
         </>
     )
 }

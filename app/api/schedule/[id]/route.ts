@@ -9,11 +9,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userWithRole = session?.user as { id: number, role: string }
-    if (userWithRole.role === 'VIEWER') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
+    const user = session.user as any
     const { id } = await params
     const body = await req.json()
 
@@ -24,6 +20,13 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 
         if (!existingSchedule) {
             return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
+        }
+
+        // Role check: If not ADMIN or EDITOR, must be owner
+        if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
+            if (parseInt(existingSchedule.employee_id.toString()) !== parseInt(user.employee_id.toString())) {
+                return NextResponse.json({ error: 'Forbidden: Can only edit your own schedule' }, { status: 403 })
+            }
         }
 
         await prisma.schedule.update({
@@ -51,11 +54,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
         return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const userWithRole = session?.user as { id: number, role: string }
-    if (userWithRole.role === 'VIEWER') {
-        return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-    }
-
+    const user = session.user as any
     const { id } = await params
 
     try {
@@ -65,6 +64,13 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
         if (!existingSchedule) {
             return NextResponse.json({ error: 'Schedule not found' }, { status: 404 })
+        }
+
+        // Role check: If not ADMIN or EDITOR, must be owner
+        if (user.role !== 'ADMIN' && user.role !== 'EDITOR') {
+            if (parseInt(existingSchedule.employee_id.toString()) !== parseInt(user.employee_id.toString())) {
+                return NextResponse.json({ error: 'Forbidden: Can only delete your own schedule' }, { status: 403 })
+            }
         }
 
         await prisma.schedule.delete({

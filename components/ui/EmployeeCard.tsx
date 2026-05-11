@@ -130,20 +130,24 @@ export function EmployeeCard({
 
                 {/* Actions */}
                 <div className="flex flex-col gap-2 ml-auto">
-                    <button 
-                        className="p-2 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors" 
-                        title="แก้ไข"
-                        onClick={() => setShowEditModal(true)}
-                    >
-                        <Pencil className="w-4 h-4" />
-                    </button>
-                    <button 
-                        className="p-2 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition-colors" 
-                        title="ลบ"
-                        onClick={() => setShowDeleteModal(true)}
-                    >
-                        <Trash2 className="w-4 h-4" />
-                    </button>
+                    {onEdit && (
+                        <button 
+                            className="p-2 rounded-lg bg-brand-500/10 text-brand-600 hover:bg-brand-500/20 transition-colors" 
+                            title="แก้ไข"
+                            onClick={() => setShowEditModal(true)}
+                        >
+                            <Pencil className="w-4 h-4" />
+                        </button>
+                    )}
+                    {onDelete && (
+                        <button 
+                            className="p-2 rounded-lg bg-rose-500/10 text-rose-600 hover:bg-rose-500/20 transition-colors" 
+                            title="ลบ"
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            <Trash2 className="w-4 h-4" />
+                        </button>
+                    )}
                 </div>
             </div>
 

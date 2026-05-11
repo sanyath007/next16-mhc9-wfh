@@ -10,7 +10,7 @@ import {
 
 const navItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/schedule', label: 'ตารางงาน', icon: CalendarDays, roles: ['ADMIN', 'EDITOR'] },
+  { href: '/schedule', label: 'ตารางงาน', icon: CalendarDays },
   { href: '/upload', label: 'อัปโหลดรายงาน', icon: Upload, roles: ['ADMIN', 'EDITOR'] },
 ]
 

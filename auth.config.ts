@@ -31,7 +31,7 @@ export default {
           id: user.id,
           email: user.email,
           name: user.name,
-          role: 'ADMIN', //user.role
+          role: user.role || 'ADMIN',
           access_token: oauth.access_token, 
           employee_id: user.employee_id
         }
