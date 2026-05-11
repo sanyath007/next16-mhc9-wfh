@@ -419,7 +419,9 @@ export default function DashboardPage() {
                                     <div className="w-2.5 h-2.5 rounded-full" style={{ background: e.color }} />
                                     <span className="text-slate-600">{e.name}</span>
                                 </div>
-                                <span className="font-mono font-medium text-slate-800">{e.value.toLocaleString()}</span>
+                                <span className="font-mono font-medium text-slate-800">
+                                    {e.value?.toLocaleString()}
+                                </span>
                             </div>
                         ))}
                     </div>

@@ -81,7 +81,7 @@ export default function LoginPage() {
               <div className="w-14 h-14 bg-brand-600 rounded-2xl flex items-center justify-center shadow-xl shadow-brand-500/30 mb-4">
                 <BarChart3 className="w-7 h-7 text-white" />
               </div>
-              <h1 className="font-display font-bold text-2xl text-slate-800">ConsultTrack</h1>
+              <h1 className="font-display font-bold text-2xl text-slate-800">MHC9 WFH</h1>
             </div>
 
             <div className="mb-10">
