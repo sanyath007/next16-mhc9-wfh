@@ -2,9 +2,11 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X, Users } from 'lucide-react'
 import moment from 'moment'
 import TagInput from '@/components/ui/forms/TagInput'
+import CustomSelect from '@/components/ui/forms/CustomSelect'
+import FormField from '@/components/ui/forms/FormField'
 
 interface UploadRecord {
     id: string
@@ -16,7 +18,7 @@ interface UploadRecord {
 export default function UploadPage() {
     const { data: session } = useSession()
     const userRole = (session?.user as { role?: string })?.role
-    const userId = (session?.user as { id?: number })?.id
+    const user = session?.user as any
     const fileRef = useRef<HTMLInputElement>(null)
 
     const [dragging, setDragging] = useState(false)
@@ -24,8 +26,12 @@ export default function UploadPage() {
     const [uploading, setUploading] = useState(false)
     const [result, setResult] = useState<{ success?: boolean; message?: string; rowCount?: number } | null>(null)
     const [history, setHistory] = useState<UploadRecord[]>([])
+    const [employees, setEmployees] = useState<any[]>([])
+    const [selectedEmployee, setSelectedEmployee] = useState<string>('')
     const [selectedSchedules, setSelectedSchedules] = useState<string[]>([])
     const [scheduleOptions, setScheduleOptions] = useState<{ value: string; label: string }[]>([])
+
+    const isAdminOrHR = userRole === 'ADMIN' || userRole === 'EDITOR'
 
     const fetchHistory = async () => {
         try {
@@ -35,15 +41,31 @@ export default function UploadPage() {
         } catch {}
     }
 
-    useEffect(() => { fetchHistory() }, [])
+    const fetchEmployees = useCallback(async () => {
+        if (!isAdminOrHR) return;
+        try {
+            const response = await fetch(`/api/employee`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${user?.access_token}`,
+                },
+            });
+            const data = await response.json()
+            setEmployees(data.filter((e: any) => e.status === 1))
+        } catch {}
+    }, [isAdminOrHR, user?.access_token])
 
-    const fetchUserSchedules = useCallback(async () => {
-        if (!userId) return
+    const fetchSchedulesForEmployee = useCallback(async (employeeId: string) => {
+        if (!employeeId) {
+            setScheduleOptions([])
+            return
+        }
         try {
             const today = moment()
-            const startDate = today.clone().subtract(7, 'days').format('YYYY-MM-DD')
+            const startDate = today.clone().subtract(14, 'days').format('YYYY-MM-DD')
             const endDate = today.clone().add(7, 'days').format('YYYY-MM-DD')
-            const res = await fetch(`/api/schedule?employee_id=${userId}&start_date=${startDate}&end_date=${endDate}&reported=0`)
+            const res = await fetch(`/api/schedule?employee_id=${employeeId}&start_date=${startDate}&end_date=${endDate}&reported=0`)
             const json = await res.json()
             const options = json.map((s: any) => ({
                 value: s.id,
@@ -51,11 +73,27 @@ export default function UploadPage() {
             }))
             setScheduleOptions(options)
         } catch {}
-    }, [userId])
+    }, [])
 
     useEffect(() => {
-        if (userId) fetchUserSchedules()
-    }, [userId])
+        fetchHistory()
+        if (isAdminOrHR) {
+            fetchEmployees()
+        }
+    }, [isAdminOrHR, fetchEmployees])
+
+    useEffect(() => {
+        if (!isAdminOrHR && user?.employee_id) {
+            setSelectedEmployee(user.employee_id.toString())
+        }
+    }, [isAdminOrHR, user?.employee_id])
+
+    useEffect(() => {
+        if (selectedEmployee) {
+            fetchSchedulesForEmployee(selectedEmployee)
+            setSelectedSchedules([]) // Clear selected schedules when employee changes
+        }
+    }, [selectedEmployee, fetchSchedulesForEmployee])
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault()
@@ -114,17 +152,44 @@ export default function UploadPage() {
 
             {/* Upload zone */}
             <div className="card p-8 space-y-6">
+                
+                {/* Employee Selection (Admins/HR only) */}
+                {isAdminOrHR ? (
+                    <FormField label="บุคลากร">
+                        <div className="w-full">
+                            <CustomSelect
+                                options={employees.map(e => ({ value: e.id.toString(), label: `${e.firstname} ${e.lastname}` }))}
+                                value={selectedEmployee}
+                                onChange={(value: string) => setSelectedEmployee(value)}
+                                placeholder="เลือกบุคลากร..."
+                                searchable
+                            />
+                        </div>
+                    </FormField>
+                ) : (
+                    <div className="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                        <div>
+                            <p className="text-xs text-slate-400 uppercase font-bold tracking-wider mb-0.5">ผู้อัปโหลด</p>
+                            <p className="text-slate-800 font-bold">{user?.name}</p>
+                        </div>
+                        <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center">
+                            <Users className="w-5 h-5 text-brand-600" />
+                        </div>
+                    </div>
+                )}
+
                 {/* Schedule Selection */}
                 <div className="space-y-3">
                     <div>
                         <h3 className="font-semibold text-slate-800">เลือกตารางงาน</h3>
-                        <p className="text-sm text-slate-500">เลือกวันที่คุณมีตาราง Work From Home ที่ต้องการอัปโหลดรายงาน</p>
+                        <p className="text-sm text-slate-500">เลือกวันที่ต้องการอัปโหลดรายงาน</p>
                     </div>
                     <TagInput
                         options={scheduleOptions}
                         value={selectedSchedules}
                         onChange={setSelectedSchedules}
-                        placeholder="เลือกวันที่ Work From Home..."
+                        placeholder={selectedEmployee ? "เลือกวันที่ Work From Home..." : "กรุณาเลือกบุคลากรก่อน..."}
+                        disabled={!selectedEmployee}
                     />
                 </div>
 
@@ -132,13 +197,15 @@ export default function UploadPage() {
                     onDragOver={e => { e.preventDefault(); setDragging(true) }}
                     onDragLeave={() => setDragging(false)}
                     onDrop={handleDrop}
-                    onClick={() => fileRef.current?.click()}
-                    className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-300 cursor-pointer overflow-hidden ${
-                        dragging
-                            ? 'border-brand-500 bg-brand-500/5 scale-[1.02] shadow-2xl shadow-brand-500/10'
-                            : file
-                                ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10'
-                                : 'border-slate-200 bg-white/30 hover:border-brand-400 hover:bg-brand-500/5 hover:shadow-xl hover:shadow-brand-500/5'
+                    onClick={() => selectedEmployee && fileRef.current?.click()}
+                    className={`relative border-2 border-dashed rounded-[2rem] p-16 text-center transition-all duration-300 overflow-hidden ${
+                        !selectedEmployee 
+                            ? 'border-slate-100 bg-slate-50/50 cursor-not-allowed grayscale'
+                            : dragging
+                                ? 'border-brand-500 bg-brand-500/5 scale-[1.02] shadow-2xl shadow-brand-500/10 cursor-pointer'
+                                : file
+                                    ? 'border-emerald-500 bg-emerald-500/5 shadow-2xl shadow-emerald-500/10 cursor-pointer'
+                                    : 'border-slate-200 bg-white/30 hover:border-brand-400 hover:bg-brand-500/5 hover:shadow-xl hover:shadow-brand-500/5 cursor-pointer'
                     }`}
                 >
                     <input
