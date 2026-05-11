@@ -179,11 +179,11 @@ export default function UploadPage() {
                 )}
 
                 {/* Schedule Selection */}
-                <div className="space-y-3">
-                    <div>
-                        <h3 className="font-semibold text-slate-800">เลือกตารางงาน</h3>
-                        <p className="text-sm text-slate-500">เลือกวันที่ต้องการอัปโหลดรายงาน</p>
-                    </div>
+                <div className="space-y-1.5">
+                    <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                        เลือกตารางงาน
+                        <span className="text-sm text-slate-400 font-normal">(สามารถเลือกวันที่มากกว่า 1 วันต่อรายงานได้)</span>
+                    </label>
                     <TagInput
                         options={scheduleOptions}
                         value={selectedSchedules}

@@ -1,8 +1,9 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Users, MapPin, Building2, ChevronDown, House } from 'lucide-react'
+import { Users, MapPin, Building2, ChevronDown, House, AlertCircle, ArrowRight } from 'lucide-react'
 import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
     ResponsiveContainer, PieChart, Pie, Cell, Legend,
@@ -11,7 +12,7 @@ import { StatCard } from '@/components/ui'
 import EmployeeList from './EmployeeList'
 import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
-import { useEmployees, useSchedules, useWorkings } from '@/lib/hooks/useWorking'
+import { useEmployees, useSchedules, useWorkings, useOverdueSchedules } from '@/lib/hooks/useWorking'
 
 type DepartmentData = {
     name: string
@@ -24,6 +25,9 @@ type DepartmentData = {
 
 export default function DashboardPage() {
     const { data: session } = useSession()
+    const user = session?.user as any
+    const isAdminOrHR = user?.role === 'ADMIN' || user?.role === 'EDITOR'
+
     const [trips, setTrips] = useState<any[]>([]);
     const [leaves, setLeaves] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(false)
@@ -33,6 +37,13 @@ export default function DashboardPage() {
     const { data: schedules } = useSchedules({ date: selectedDate })
     const { data: workings } = useWorkings({ schedules: schedules, dep: selectedDep })
     const { data: employees } = useEmployees()
+    
+    // Fetch overdue schedules for alert
+    const { data: overdueSchedules } = useOverdueSchedules(
+        !isAdminOrHR ? { employeeId: user?.employee_id?.toString() } : {}
+    )
+
+    const overdueCount = overdueSchedules?.length || 0
 
     const fetchEvents = useCallback(async () => {
         try {
@@ -274,6 +285,47 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Pending Reports Alert */}
+            {overdueCount > 0 && (
+                <div className="animate-fadeInUp">
+                    <div className="relative overflow-hidden bg-white/40 backdrop-blur-xl border border-white/40 rounded-[2rem] p-6 shadow-xl shadow-brand-500/5 group">
+                        {/* Decorative background blobs */}
+                        <div className="absolute -top-12 -right-12 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700" />
+                        <div className="absolute -bottom-12 -left-12 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl transition-transform group-hover:scale-150 duration-700" />
+
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                            <div className="flex items-center gap-5 text-center md:text-left">
+                                <div className="w-14 h-14 bg-rose-500/10 rounded-2xl flex items-center justify-center border border-rose-500/20 shadow-inner shrink-0">
+                                    <AlertCircle className="w-7 h-7 text-rose-500 animate-pulse" />
+                                </div>
+                                <div>
+                                    <h3 className="text-xl font-bold text-slate-900 leading-tight">
+                                        {isAdminOrHR 
+                                            ? `มีรายงานค้างส่งทั้งหมด ${overdueCount} รายการ`
+                                            : `คุณมีรายงานที่ยังไม่ได้ส่ง ${overdueCount} รายการ`
+                                        }
+                                    </h3>
+                                    <p className="text-slate-500 text-sm mt-1 font-medium">
+                                        {isAdminOrHR
+                                            ? 'กรุณาตรวจสอบและแจ้งเตือนบุคลากรให้ส่งรายงานการปฏิบัติงาน'
+                                            : 'กรุณาอัปโหลดรายงานผลการปฏิบัติงานเพื่อให้ข้อมูลเป็นปัจจุบัน'
+                                        }
+                                    </p>
+                                </div>
+                            </div>
+
+                            <Link 
+                                href="/upload"
+                                className="flex items-center gap-3 px-6 py-3 bg-brand-600 text-white rounded-2xl font-bold shadow-lg shadow-brand-500/30 hover:bg-brand-700 hover:scale-[1.02] transition-all group/btn"
+                            >
+                                {isAdminOrHR ? 'จัดการรายงาน' : 'อัปโหลดเดี๋ยวนี้'}
+                                <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                            </Link>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Department filter pills */}
             <div className="card px-4 py-3.5">

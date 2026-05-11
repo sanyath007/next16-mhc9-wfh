@@ -2,6 +2,7 @@
 
 import { useSession } from "next-auth/react"
 import { useCallback, useEffect, useState } from "react"
+import moment from "moment"
 
 export function useEmployees () {
     const { data: session } = useSession()
@@ -104,6 +105,46 @@ export function useSchedules ({ date }: { date: string }) {
     useEffect(() => {
         fetchSchedules(date)
     }, [date])
+
+    return { data, isLoading, error }
+}
+
+export function useOverdueSchedules ({ employeeId }: { employeeId?: string } = {}) {
+    const { data: session } = useSession()
+    const [data, setData] = useState<any[] | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
+    const [error, setError] = useState<string | null>(null)
+
+    const fetchOverdue = useCallback(async () => {
+        try {
+            const yesterday = moment().subtract(1, 'days').format('YYYY-MM-DD')
+            // Fetch schedules before today that are not yet reported
+            let url = `/api/schedule?end_date=${yesterday}&reported=0`
+            if (employeeId) {
+                url += `&employee_id=${employeeId}`
+            }
+
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch overdue schedules');
+            }
+
+            const schedules = await response.json()
+            setData(schedules);
+        } catch (error) {
+            console.error(error)
+        }
+    }, [employeeId])
+
+    useEffect(() => {
+        fetchOverdue()
+    }, [fetchOverdue])
 
     return { data, isLoading, error }
 }
