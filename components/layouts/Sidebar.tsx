@@ -8,7 +8,14 @@ import {
   LogOut, ChevronRight, CalendarDays
 } from 'lucide-react'
 
-const navItems = [
+type NavItem = {
+  href: string
+  label: string
+  icon: any
+  roles?: any[]
+}
+
+const navItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/schedule', label: 'ตารางงาน', icon: CalendarDays },
   { href: '/upload', label: 'อัปโหลดรายงาน', icon: Upload },
