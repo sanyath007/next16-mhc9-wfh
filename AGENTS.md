@@ -1,12 +1,14 @@
-# AGENTS.md - AI Agent Instructions for Next.js Employee work tracking dashboard
+# AGENTS.md - AI Agent Instructions for MHC9 WFH (รายงานผลงานการ Work From Home)
 
 ## Project Overview
-This is a Next.js 16 employee work tracking dashboard for monitoring work-from-home (WFH), office attendance, leaves, and business trips. The app tracks employee work status across departments with real-time data visualization and filtering capabilities.
+MHC9 WFH is a comprehensive **Employee Work Tracking Dashboard** for monitoring work-from-home (WFH), office attendance, leaves, and business trips. The app tracks employee work status across departments with real-time data visualization and filtering capabilities.
 
 ## Tech Stack
-- **Framework**: Next.js 16.1.6 with App Router and TypeScript (strict mode enabled)
-- **Database**: Prisma ORM with MySQL, using snake_case fields mapped to PascalCase models
-- **Authentication**: NextAuth v5 (Beta) with JWT sessions and role-based access (ADMIN, EDITOR, VIEWER)
+- **Framework**: Next.js 15+ with App Router and TypeScript (strict mode enabled)
+- **Database**: Prisma ORM with MySQL/SQLite, using snake_case fields mapped to PascalCase models
+- **Authentication**: NextAuth v5 (Beta) with JWT sessions and role-based access:
+    - **`ADMIN` / `EDITOR` (HR Officer):** Full management of all employee schedules.
+    - **`VIEWER` (Employee):** Restricted to adding their own schedules and managing only future/current records.
 - **Styling**: Tailwind CSS v4.2 with custom utilities in `app/globals.css`
 - **OCR**: Tesseract.js with Thai+English support for PDF/image processing
 - **Charts**: Recharts for data visualization
@@ -21,7 +23,7 @@ This is a Next.js 16 employee work tracking dashboard for monitoring work-from-h
 
 ### Next.js Structure
 - App Router: Feature-based directories with `layout.tsx` and `page.tsx`
-- API routes: Always check `const session = await auth()` first; return 401/403/400 with `{ error: string }`
+- API routes: Always check `const session = await auth()` first; return 401/403/400 with `{ error: string }`. Implement role and ownership checks (e.g., `user.role !== 'ADMIN' && employee_id !== user.employee_id`).
 - Root layout: Sets Thai metadata, Google Fonts, wraps with `<Providers>`
 - Protected routes: Dashboard layout redirects unauthenticated users to `/login`
 
@@ -53,13 +55,16 @@ This is a Next.js 16 employee work tracking dashboard for monitoring work-from-h
 - Responsive: Mobile-first, `hidden lg:flex` for desktop-only
 
 ## Project-Specific Patterns
-- **Work Status Tracking**: Tracks employee work status as WFH, office, leave, or business trip
-- **Department Filtering**: Filter by departments (อำนวยการ, วิชาการสุขภาพจิต, บริการสุขภาพจิต)
-- **Date Filtering**: Single date selection for daily work status tracking
-- **CSV Upload**: Parse PDF → Extract employee data → Validate → Create data upload records
-- **Statistics Calculation**: Calculate percentages for WFH, office, leave, and trip statuses
-- **Language**: Thai-first UI, `lang="th"`, Thai fonts
-- **Error Handling**: Try-catch in APIs, console.error, JSON responses
+- **Work Status Tracking**: Tracks employee work status as WFH, office, leave, or business trip.
+- **Role-Based Schedule Management**: 
+    - Employees can add their own schedules; Admin/HR can add for anyone.
+    - **Future-Only Cancellation**: Regular users can only cancel or edit schedules for **today or future dates**. Past schedules are locked.
+- **Department Filtering**: Filter by departments (อำนวยการ, วิชาการสุขภาพจิต, บริการสุขภาพจิต).
+- **Date Filtering**: Single date selection for daily work status tracking.
+- **CSV Upload**: Parse PDF → Extract employee data → Validate → Create data upload records.
+- **Statistics Calculation**: Calculate percentages for WFH, office, leave, and trip statuses.
+- **Language**: Thai-first UI, `lang="th"`, Thai fonts.
+- **Error Handling**: Try-catch in APIs, console.error, JSON responses.
 
 ## Build & Run
 - Install: `npm install`
