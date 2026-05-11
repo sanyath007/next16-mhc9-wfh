@@ -34,3 +34,5 @@ ecosystem.config.js
 # AI agent configuration
 .agents/
 skills-lock.json
+
+public/
