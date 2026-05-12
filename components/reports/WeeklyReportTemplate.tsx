@@ -17,7 +17,7 @@ const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTempla
     const dateRangeStr = `ณ วันที่ ${startM.format('D')} ${startM.month() === endM.month() ? '' : startM.format('MMMM')} - ${endM.format('D MMMM')} พ.ศ. ${endM.year() + 543}`
 
     return (
-        <div ref={ref} className="p-8 bg-white text-black font-['Prompt',_sans-serif] w-[297mm] min-h-[210mm] mx-auto overflow-hidden">
+        <div ref={ref} className="p-2 bg-white text-black font-['TH_Sarabun',_sans-serif] w-[297mm] min-h-[210mm] mx-0 overflow-hidden" style={{ fontFamily: 'TH Sarabun, sans-serif' }}>
             <div className="text-center space-y-1 mb-8">
                 <h1 className="text-xl font-bold">รายงานผลการปฏิบัติงานนอกสถานที่ตั้งของส่วนราชการ</h1>
                 <h2 className="text-lg font-bold">(Work from Home)</h2>
@@ -28,16 +28,16 @@ const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTempla
             <table className="w-full border-collapse border border-black text-sm leading-relaxed">
                 <thead>
                     <tr>
-                        <th rowSpan={2} className="border border-black py-2 px-3 w-12 align-middle">ลำดับ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-[5%] align-middle">ลำดับ</th>
                         <th rowSpan={2} className="border border-black py-2 px-3 align-middle">ชื่อ - นามสกุล</th>
-                        <th rowSpan={2} className="border border-black py-2 px-3 align-middle">ตำแหน่ง</th>
-                        <th rowSpan={2} className="border border-black py-2 px-3 w-32 align-middle">เวลา<br/>การปฏิบัติราชการ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-[25%] align-middle">ตำแหน่ง</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-[15%] align-middle">เวลา<br/>การปฏิบัติราชการ</th>
                         <th colSpan={2} className="border border-black py-2 px-3 align-middle">ส่งรายงาน<br/>ข้อตกลงและรายงาน<br/>การปฏิบัติราชการ</th>
-                        <th rowSpan={2} className="border border-black py-2 px-3 w-48 align-middle">หมายเหตุ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-[15%] align-middle">หมายเหตุ</th>
                     </tr>
                     <tr>
-                        <th className="border border-black py-1 px-2 w-20 text-xs align-middle">ยังไม่<br/>ดำเนินการ</th>
-                        <th className="border border-black py-1 px-2 w-20 text-xs align-middle">ดำเนินการ<br/>เรียบร้อยแล้ว</th>
+                        <th className="border border-black py-2 px-2 w-[8%] text-xs align-middle">ยังไม่<br/>ดำเนินการ</th>
+                        <th className="border border-black py-2 px-2 w-[8%] text-xs align-middle">ดำเนินการ<br/>เรียบร้อยแล้ว</th>
                     </tr>
                 </thead>
                 <tbody>

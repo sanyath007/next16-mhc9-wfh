@@ -81,10 +81,17 @@ export async function GET(req: NextRequest) {
         where: whereClause,
         include: {
             employee: {
-                select: {
-                    id: true,
-                    firstname: true,
-                    lastname: true,
+                include: {
+                    position: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    level: {
+                        select: {
+                            name: true
+                        }
+                    }
                 }
             }
         },
