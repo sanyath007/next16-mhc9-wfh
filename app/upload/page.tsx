@@ -2,11 +2,15 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X, Users } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react'
 import moment from 'moment'
 import TagInput from '@/components/ui/forms/TagInput'
 import CustomSelect from '@/components/ui/forms/CustomSelect'
 import FormField from '@/components/ui/forms/FormField'
+import Tesseract from 'tesseract.js'
+import { getDocument, GlobalWorkerOptions, version } from 'pdfjs-dist/legacy/build/pdf.mjs';
+
+GlobalWorkerOptions.workerSrc = `https://cdn.jsdelivr.net/npm/pdfjs-dist@${version}/build/pdf.worker.min.mjs`;
 
 interface UploadRecord {
     id: string
@@ -29,7 +33,13 @@ export default function UploadPage() {
     const [employees, setEmployees] = useState<any[]>([])
     const [selectedEmployee, setSelectedEmployee] = useState<string>('')
     const [selectedSchedules, setSelectedSchedules] = useState<string[]>([])
-    const [scheduleOptions, setScheduleOptions] = useState<{ value: string; label: string }[]>([])
+    const [scheduleOptions, setScheduleOptions] = useState<{ value: string; label: string; date: string }[]>([])
+
+    // OCR States
+    const [isOcrProcessing, setIsOcrProcessing] = useState(false)
+    const [ocrProgress, setOcrProgress] = useState(0)
+    const [ocrText, setOcrText] = useState('')
+    const [ocrWarning, setOcrWarning] = useState<string | null>(null)
 
     const isAdminOrHR = userRole === 'ADMIN' || userRole === 'EDITOR'
 
@@ -69,7 +79,8 @@ export default function UploadPage() {
             const json = await res.json()
             const options = json.map((s: any) => ({
                 value: s.id,
-                label: moment(s.work_date).locale('th').format('D MMMM') + ' ' + (moment(s.work_date).year() + 543)
+                label: moment(s.work_date).locale('th').format('D MMMM') + ' ' + (moment(s.work_date).year() + 543),
+                date: s.work_date
             }))
             setScheduleOptions(options)
         } catch {}
@@ -91,9 +102,87 @@ export default function UploadPage() {
     useEffect(() => {
         if (selectedEmployee) {
             fetchSchedulesForEmployee(selectedEmployee)
-            setSelectedSchedules([]) // Clear selected schedules when employee changes
+            setSelectedSchedules([]) 
         }
     }, [selectedEmployee, fetchSchedulesForEmployee])
+
+    const processOCR = async (pdfFile: File) => {
+        setIsOcrProcessing(true)
+        setOcrProgress(0)
+        setOcrText('')
+        setOcrWarning(null)
+
+        try {
+            const pdf = await getDocument(URL.createObjectURL(pdfFile)).promise;
+            let fullText = '';
+
+            for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+                const page = await pdf.getPage(pageNum);
+                const viewport = page.getViewport({ scale: 1.5 });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.width = viewport.width;
+                canvas.height = viewport.height;
+
+                await page.render({ canvasContext: context!, canvas, viewport }).promise;
+                const text = await Tesseract.recognize(canvas, 'tha+eng', {
+                    logger: (m) => {
+                        if (m.status === 'recognizing text') {
+                            setOcrProgress(Math.round((pageNum / pdf.numPages) * 100));
+                        }
+                    }
+                });
+
+                fullText += text.data.text;
+            }
+
+            setOcrText(fullText);
+            validateOCRContent(fullText);
+        } catch (error) {
+            console.error('OCR Error:', error);
+            setOcrWarning('ไม่สามารถประมวลผล OCR ของไฟล์ได้');
+        } finally {
+            setIsOcrProcessing(false);
+        }
+    }
+
+    const validateOCRContent = (text: string) => {
+        if (selectedSchedules.length === 0) return;
+        console.log(text);
+
+        const missingDates: string[] = [];
+        selectedSchedules.forEach(id => {
+            const schedule = scheduleOptions.find(o => o.value === id);
+            if (schedule) {
+                const m = moment(schedule.date).locale('th');
+                const day = m.format('D');
+                const month = m.format('MMMM');
+                const year = (m.year() + 543).toString();
+
+                // Check if all parts of the date appear in the text
+                const hasDay = text.includes(day);
+                const hasMonth = text.includes(month);
+                const hasYear = text.includes(year);
+
+                if (!hasDay || !hasMonth || !hasYear) {
+                    missingDates.push(schedule.label);
+                }
+            }
+        });
+
+        if (missingDates.length > 0) {
+            setOcrWarning(`ตรวจไม่พบข้อมูลวันที่ ${missingDates.join(', ')} ในไฟล์ที่อัปโหลด กรุณาตรวจสอบว่าไฟล์ถูกต้องหรือไม่`);
+        } else {
+            setOcrWarning(null);
+        }
+    }
+
+    // Re-validate when selection changes
+    useEffect(() => {
+        if (ocrText && selectedSchedules.length > 0) {
+            validateOCRContent(ocrText);
+        }
+    }, [selectedSchedules, ocrText])
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault()
@@ -103,6 +192,9 @@ export default function UploadPage() {
         if (dropped?.name.endsWith('.pdf')) {
             setFile(dropped)
             setResult(null)
+
+            /** Run OCR and validate content before allowing upload */
+            processOCR(dropped)
         }
     }, [])
 
@@ -111,6 +203,9 @@ export default function UploadPage() {
         if (selected) {
             setFile(selected)
             setResult(null)
+
+            /** Run OCR and validate content before allowing upload */
+            processOCR(selected)
         }
     }
 
@@ -131,6 +226,8 @@ export default function UploadPage() {
                 setResult({ success: true, message: 'อัปโหลดสำเร็จ', rowCount: json.rowCount })
                 setFile(null)
                 setSelectedSchedules([])
+                setOcrText('')
+                setOcrWarning(null)
                 fetchHistory()
             } else {
                 setResult({ success: false, message: json.error || 'เกิดข้อผิดพลาด' })
@@ -152,7 +249,6 @@ export default function UploadPage() {
 
             {/* Upload zone */}
             <div className="card p-8 space-y-6">
-                
                 {/* Employee Selection (Admins/HR only) */}
                 {isAdminOrHR ? (
                     <FormField label="บุคลากร">
@@ -193,6 +289,7 @@ export default function UploadPage() {
                     />
                 </div>
 
+                {/* File upload input */}
                 <div
                     onDragOver={e => { e.preventDefault(); setDragging(true) }}
                     onDragLeave={() => setDragging(false)}
@@ -215,7 +312,7 @@ export default function UploadPage() {
                         onChange={handleFile}
                         className="hidden"
                     />
-                    
+
                     {/* Decorative blobs inside dropzone */}
                     <div className="absolute -top-10 -right-10 w-32 h-32 bg-brand-500/10 rounded-full blur-2xl -z-10" />
                     <div className="absolute -bottom-10 -left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl -z-10" />
@@ -234,7 +331,7 @@ export default function UploadPage() {
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={e => { e.stopPropagation(); setFile(null) }}
+                                    onClick={e => { e.stopPropagation(); setFile(null); setOcrText(''); setOcrWarning(null) }}
                                     className="flex items-center gap-2 text-sm font-bold text-rose-500 hover:text-rose-700 transition-colors bg-rose-500/5 px-4 py-2 rounded-xl border border-rose-500/10"
                                 >
                                     <X className="w-4 h-4" /> ลบไฟล์ออก
@@ -258,6 +355,53 @@ export default function UploadPage() {
                     </div>
                 </div>
 
+                {/* OCR Progress */}
+                {isOcrProcessing && (
+                    <div className="space-y-3 p-6 bg-brand-50/50 border border-brand-100 rounded-3xl animate-fadeInUp">
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-brand-100 rounded-xl flex items-center justify-center">
+                                    <Loader2 className="w-5 h-5 text-brand-600 animate-spin" />
+                                </div>
+                                <div>
+                                    <p className="font-bold text-slate-800 text-sm">กำลังตรวจสอบความถูกต้องของรายงาน...</p>
+                                    <p className="text-xs text-slate-500 font-medium">ใช้เวลาสักครู่ในการประมวลผลด้วย AI</p>
+                                </div>
+                            </div>
+                            <span className="text-sm font-mono font-bold text-brand-600">{ocrProgress}%</span>
+                        </div>
+                        <div className="h-2 w-full bg-brand-100 rounded-full overflow-hidden shadow-inner">
+                            <div 
+                                className="h-full bg-brand-500 transition-all duration-300 ease-out" 
+                                style={{ width: `${ocrProgress}%` }}
+                            />
+                        </div>
+                    </div>
+                )}
+
+                {/* OCR Validation Warning */}
+                {/* {ocrWarning && !isOcrProcessing && (
+                    <div className="flex items-start gap-4 p-5 bg-amber-500/10 border border-amber-500/20 rounded-2xl animate-fadeInUp">
+                        <div className="p-1.5 bg-amber-500/20 rounded-lg shrink-0">
+                            <AlertCircle className="w-5 h-5 text-amber-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm font-bold text-amber-800 leading-tight">คำเตือน: ข้อมูลไม่ตรงกัน</p>
+                            <p className="text-xs text-amber-700/80 font-medium mt-1 leading-relaxed">{ocrWarning}</p>
+                        </div>
+                    </div>
+                )} */}
+
+                {/* OCR Success */}
+                {/* {!ocrWarning && ocrText && !isOcrProcessing && (
+                    <div className="flex items-center gap-4 p-4 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl animate-fadeInUp">
+                        <div className="p-1.5 bg-emerald-500/20 rounded-lg shrink-0">
+                            <Sparkles className="w-4 h-4 text-emerald-600" />
+                        </div>
+                        <p className="text-xs font-bold text-emerald-800">ตรวจสอบความถูกต้องเบื้องต้นสำเร็จ วันที่ในรายงานตรงกับที่เลือก</p>
+                    </div>
+                )} */}
+
                 {/* Result */}
                 {result && (
                     <div className={`flex items-start gap-4 p-5 rounded-2xl text-sm font-bold border backdrop-blur-md animate-fadeInUp ${
@@ -280,7 +424,7 @@ export default function UploadPage() {
 
                 <button
                     onClick={handleUpload}
-                    disabled={!file || selectedSchedules.length === 0 || uploading}
+                    disabled={!file || selectedSchedules.length === 0 || uploading || isOcrProcessing}
                     className="btn-primary w-full py-4 text-lg font-bold shadow-2xl flex items-center justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {uploading ? (
