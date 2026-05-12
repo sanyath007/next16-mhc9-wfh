@@ -82,6 +82,11 @@ export async function GET(req: NextRequest) {
         include: {
             employee: {
                 include: {
+                    prefix: {
+                        select: {
+                            name: true
+                        }
+                    },
                     position: {
                         select: {
                             name: true

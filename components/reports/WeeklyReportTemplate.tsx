@@ -2,6 +2,14 @@
 
 import React from 'react'
 import moment from 'moment'
+import { Sarabun } from 'next/font/google'
+import { cn } from '@/lib/utils/tailwindcss';
+
+const sarabun = Sarabun({
+  weight: ['400', '700'], // Specify needed weights
+  subsets: ['thai', 'latin'], // Specify needed subsets
+  display: 'swap', // Recommended for better performance
+});
 
 interface WeeklyReportTemplateProps {
     data: any[]
@@ -10,14 +18,14 @@ interface WeeklyReportTemplateProps {
     orgName?: string
 }
 
-const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTemplateProps>(({ data, startDate, endDate, orgName = 'ศูนย์สุขภาพจิตที่ ๙' }, ref) => {
+const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTemplateProps>(({ data, startDate, endDate, orgName = 'ศูนย์สุขภาพจิตที่ 9' }, ref) => {
     const startM = moment(startDate).locale('th')
     const endM = moment(endDate).locale('th')
     
     const dateRangeStr = `ณ วันที่ ${startM.format('D')} ${startM.month() === endM.month() ? '' : startM.format('MMMM')} - ${endM.format('D MMMM')} พ.ศ. ${endM.year() + 543}`
 
     return (
-        <div ref={ref} className="p-2 bg-white text-black font-['TH_Sarabun',_sans-serif] w-[297mm] min-h-[210mm] mx-0 overflow-hidden" style={{ fontFamily: 'TH Sarabun, sans-serif' }}>
+        <div ref={ref} className={ cn("p-2 bg-white text-black w-[297mm] min-h-[210mm] mx-0 overflow-hidden", sarabun.className) }>
             <div className="text-center space-y-1 mb-8">
                 <h1 className="text-xl font-bold">รายงานผลการปฏิบัติงานนอกสถานที่ตั้งของส่วนราชการ</h1>
                 <h2 className="text-lg font-bold">(Work from Home)</h2>
@@ -84,7 +92,7 @@ const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTempla
                     <div>
                         <p>ลงชื่อ...............................................................</p>
                         <p>(นางสาวจุฑามาศ วรรณศิลป์)</p>
-                        <p>ผู้อำนวยการศูนย์สุขภาพจิตที่ ๙</p>
+                        <p>ผู้อำนวยการศูนย์สุขภาพจิตที่ 9</p>
                         <p>วันที่ .......... เดือน ..................... พ.ศ. ...............</p>
                     </div>
                 </div>

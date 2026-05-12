@@ -67,8 +67,8 @@ export default function DashboardPage() {
                 const empId = curr.employee_id
                 if (!acc[empId]) {
                     acc[empId] = {
-                        name: `${curr.employee.firstname} ${curr.employee.lastname}`,
-                        position: `${curr.employee.position?.name}${curr.employee.level ? curr.employee.level?.name : ''}` || '' ,
+                        name: `${curr.employee.prefix?.name || ''}${curr.employee.firstname} ${curr.employee.lastname}`,
+                        position: `${curr.employee.position?.name}${curr.employee.level ? curr.employee.level?.name !== 'ต้น' ? curr.employee.level?.name : '' : ''}` || '' ,
                         reported: true, // Start true, set false if any is not reported
                         dates: []
                     }
