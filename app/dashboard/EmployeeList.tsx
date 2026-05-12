@@ -18,7 +18,7 @@ const EmployeeList = (
 
     const handleDownload = async (scheduleId: string) => {
         try {
-            const response = await fetch(`/api/upload/download?schedule_id=${scheduleId}`)
+            const response = await fetch(`/api/download?schedule_id=${scheduleId}`)
             if (response.ok) {
                 const data = await response.json()
                 if (data.filename) {
