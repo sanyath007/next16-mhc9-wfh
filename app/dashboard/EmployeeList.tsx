@@ -69,7 +69,7 @@ const EmployeeList = (
                                     </div>
                                 </td>
                                 <td className="px-5 py-2 text-sm text-slate-600">
-                                    {employee.position?.name}{employee.level ? employee.level?.name : ''}
+                                    {employee.position?.name}{employee.level ? employee.level?.name !== 'ต้น' ? employee.level?.name : '' : ''}
                                 </td>
                                 <td className="px-5 py-2 text-sm text-slate-600">
                                     {employee.members[0]?.department?.name}
