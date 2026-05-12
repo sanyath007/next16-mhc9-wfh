@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { Users, MapPin, Building2, ChevronDown, House, AlertCircle, ArrowRight } from 'lucide-react'
+import { Users, MapPin, Building2, ChevronDown, House, AlertCircle, ArrowRight, Download, Loader2 } from 'lucide-react'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import {
@@ -13,6 +13,9 @@ import EmployeeList from './EmployeeList'
 import DatePicker from '@/components/ui/forms/DatePicker'
 import moment from 'moment'
 import { useEmployees, useSchedules, useWorkings, useOverdueSchedules } from '@/lib/hooks/useWorking'
+import WeeklyReportTemplate from '@/components/reports/WeeklyReportTemplate'
+import { downloadPDF } from '@/lib/utils/pdf'
+import { useRef } from 'react'
 
 type DepartmentData = {
     name: string
@@ -34,9 +37,65 @@ export default function DashboardPage() {
     const [selectedDep, setSelectedDep] = useState<string>('')
     const [selectedDate, setSelectedDate] = useState<string>(moment().format('YYYY-MM-DD'))
 
+    const [isExporting, setIsExporting] = useState(false)
+    const [exportData, setExportData] = useState<any[]>([])
+    const [exportRange, setExportRange] = useState({ start: '', end: '' })
+    const reportRef = useRef<HTMLDivElement>(null)
+
     const { data: schedules } = useSchedules({ date: selectedDate })
     const { data: workings } = useWorkings({ schedules: schedules, dep: selectedDep })
     const { data: employees } = useEmployees()
+
+    const handleExportWeekly = async () => {
+        setIsExporting(true)
+        try {
+            const startOfWeek = moment(selectedDate).startOf('isoWeek').format('YYYY-MM-DD')
+            const endOfWeek = moment(selectedDate).endOf('isoWeek').format('YYYY-MM-DD')
+            setExportRange({ start: startOfWeek, end: endOfWeek })
+
+            const response = await fetch(`/api/schedule?start_date=${startOfWeek}&end_date=${endOfWeek}`, {
+                method: 'GET',
+                headers: { 'Content-Type': 'application/json' },
+            })
+
+            if (!response.ok) throw new Error('Failed to fetch weekly schedules')
+
+            const data = await response.json()
+            
+            // Group by employee
+            const grouped = data.reduce((acc: any, curr: any) => {
+                const empId = curr.employee_id
+                if (!acc[empId]) {
+                    acc[empId] = {
+                        name: `${curr.employee.firstname} ${curr.employee.lastname}`,
+                        position: curr.employee.position?.name || 'บุคลากร',
+                        reported: true, // Start true, set false if any is not reported
+                        dates: []
+                    }
+                }
+                acc[empId].dates.push(parseInt(moment(curr.work_date).format('D')))
+                if (!curr.reported) acc[empId].reported = false
+                return acc
+            }, {})
+
+            const finalData = Object.values(grouped).map((item: any) => ({
+                ...item,
+                dates: item.dates.sort((a: number, b: number) => a - b)
+            })).sort((a: any, b: any) => a.name.localeCompare(b.name, 'th'))
+            setExportData(finalData)
+
+            // Wait for render
+            setTimeout(async () => {
+                if (reportRef.current) {
+                    await downloadPDF(reportRef.current, `รายงาน_WFH_สัปดาห์_${startOfWeek}_ถึง_${endOfWeek}.pdf`)
+                }
+                setIsExporting(false)
+            }, 500)
+        } catch (error) {
+            console.error(error)
+            setIsExporting(false)
+        }
+    }
     
     // Fetch overdue schedules for alert
     const { data: overdueSchedules } = useOverdueSchedules(
@@ -283,7 +342,32 @@ export default function DashboardPage() {
                             inputCss='border-slate-200 hover:border-slate-300 hover:shadow-sm'
                         />
                     </div>
+                    {isAdminOrHR && (
+                        <button
+                            onClick={handleExportWeekly}
+                            disabled={isExporting}
+                            className="btn-primary py-2.5 px-4 flex items-center gap-2 whitespace-nowrap"
+                            title="ส่งออกรายงานประจำสัปดาห์"
+                        >
+                            {isExporting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Download className="w-4 h-4" />
+                            )}
+                            <span className="max-lg:hidden">รายงานประจำสัปดาห์</span>
+                        </button>
+                    )}
                 </div>
+            </div>
+
+            {/* Hidden Template for PDF Export */}
+            <div className="fixed left-[-9999px] top-0 pointer-events-none">
+                <WeeklyReportTemplate 
+                    ref={reportRef}
+                    data={exportData}
+                    startDate={exportRange.start}
+                    endDate={exportRange.end}
+                />
             </div>
 
             {/* Pending Reports Alert */}
