@@ -25,31 +25,31 @@ const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTempla
                 <h4 className="text-md font-bold">{dateRangeStr}</h4>
             </div>
 
-            <table className="w-full border-collapse border border-black text-sm">
+            <table className="w-full border-collapse border border-black text-sm leading-relaxed">
                 <thead>
                     <tr>
-                        <th rowSpan={2} className="border border-black p-2 w-12">ลำดับ</th>
-                        <th rowSpan={2} className="border border-black p-2">ชื่อ - นามสกุล</th>
-                        <th rowSpan={2} className="border border-black p-2">ตำแหน่ง</th>
-                        <th rowSpan={2} className="border border-black p-2 w-32">เวลา<br/>การปฏิบัติราชการ</th>
-                        <th colSpan={2} className="border border-black p-2">ส่งรายงาน<br/>ข้อตกลงและรายงาน<br/>การปฏิบัติราชการ</th>
-                        <th rowSpan={2} className="border border-black p-2 w-48">หมายเหตุ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-12 align-middle">ลำดับ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 align-middle">ชื่อ - นามสกุล</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 align-middle">ตำแหน่ง</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-32 align-middle">เวลา<br/>การปฏิบัติราชการ</th>
+                        <th colSpan={2} className="border border-black py-2 px-3 align-middle">ส่งรายงาน<br/>ข้อตกลงและรายงาน<br/>การปฏิบัติราชการ</th>
+                        <th rowSpan={2} className="border border-black py-2 px-3 w-48 align-middle">หมายเหตุ</th>
                     </tr>
                     <tr>
-                        <th className="border border-black p-1 w-20 text-xs">ยังไม่<br/>ดำเนินการ</th>
-                        <th className="border border-black p-1 w-20 text-xs">ดำเนินการ<br/>เรียบร้อยแล้ว</th>
+                        <th className="border border-black py-1 px-2 w-20 text-xs align-middle">ยังไม่<br/>ดำเนินการ</th>
+                        <th className="border border-black py-1 px-2 w-20 text-xs align-middle">ดำเนินการ<br/>เรียบร้อยแล้ว</th>
                     </tr>
                 </thead>
                 <tbody>
                     {data.map((item, index) => (
                         <tr key={index}>
-                            <td className="border border-black p-2 text-center">{index + 1}</td>
-                            <td className="border border-black p-2">{item.name}</td>
-                            <td className="border border-black p-2">{item.position}</td>
-                            <td className="border border-black p-2 text-center">08.30 - 16.30 น.</td>
-                            <td className="border border-black p-2 text-center">{!item.reported ? '/' : ''}</td>
-                            <td className="border border-black p-2 text-center">{item.reported ? '/' : ''}</td>
-                            <td className="border border-black p-2 text-xs">
+                            <td className="border border-black py-2 px-3 text-center align-middle">{index + 1}</td>
+                            <td className="border border-black py-2 px-3 align-middle">{item.name}</td>
+                            <td className="border border-black py-2 px-3 align-middle">{item.position}</td>
+                            <td className="border border-black py-2 px-3 text-center align-middle">08.30 - 16.30 น.</td>
+                            <td className="border border-black py-2 px-3 text-center align-middle">{!item.reported ? '/' : ''}</td>
+                            <td className="border border-black py-2 px-3 text-center align-middle">{item.reported ? '/' : ''}</td>
+                            <td className="border border-black py-2 px-3 text-xs align-middle">
                                 WFH. วันที่ {item.dates.join(', ')}
                             </td>
                         </tr>
