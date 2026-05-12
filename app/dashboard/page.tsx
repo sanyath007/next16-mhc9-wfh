@@ -49,8 +49,8 @@ export default function DashboardPage() {
     const handleExportWeekly = async () => {
         setIsExporting(true)
         try {
-            const startOfWeek = moment(selectedDate).startOf('isoWeek').format('YYYY-MM-DD')
-            const endOfWeek = moment(selectedDate).endOf('isoWeek').format('YYYY-MM-DD')
+            const startOfWeek = moment(selectedDate).isoWeekday(1).format('YYYY-MM-DD')
+            const endOfWeek = moment(selectedDate).isoWeekday(5).format('YYYY-MM-DD')
             setExportRange({ start: startOfWeek, end: endOfWeek })
 
             const response = await fetch(`/api/schedule?start_date=${startOfWeek}&end_date=${endOfWeek}`, {
