@@ -9,7 +9,7 @@ import jsPDF from 'jspdf';
 export const downloadPDF = async (element: HTMLElement, filename: string) => {
     try {
         const canvas = await html2canvas(element, {
-            scale: 2, // Higher resolution
+            scale: 2,
             useCORS: true,
             logging: false,
             backgroundColor: '#ffffff'
@@ -17,16 +17,33 @@ export const downloadPDF = async (element: HTMLElement, filename: string) => {
 
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF({
-            orientation: 'portrait',
+            orientation: 'landscape',
             unit: 'mm',
             format: 'a4'
         });
 
-        const imgProps = pdf.getImageProperties(imgData);
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const marginX = 5;
+        const marginY = 5;
+        const contentWidth = pdfWidth - (marginX * 2);
+        const contentHeight = pdfHeight - (marginY * 2);
 
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        const imgProps = pdf.getImageProperties(imgData);
+        const imgAspectRatio = imgProps.width / imgProps.height;
+        
+        let finalWidth = contentWidth;
+        let finalHeight = contentWidth / imgAspectRatio;
+        
+        if (finalHeight > contentHeight) {
+            finalHeight = contentHeight;
+            finalWidth = contentHeight * imgAspectRatio;
+        }
+
+        const xOffset = marginX + (contentWidth - finalWidth) / 2;
+        const yOffset = marginY + (contentHeight - finalHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
         pdf.save(filename);
         
         return true;

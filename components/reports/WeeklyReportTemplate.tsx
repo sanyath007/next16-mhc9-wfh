@@ -17,7 +17,7 @@ const WeeklyReportTemplate = React.forwardRef<HTMLDivElement, WeeklyReportTempla
     const dateRangeStr = `ณ วันที่ ${startM.format('D')} ${startM.month() === endM.month() ? '' : startM.format('MMMM')} - ${endM.format('D MMMM')} พ.ศ. ${endM.year() + 543}`
 
     return (
-        <div ref={ref} className="p-12 bg-white text-black font-['Prompt',_sans-serif] w-[210mm] min-h-[297mm] mx-auto overflow-hidden">
+        <div ref={ref} className="p-8 bg-white text-black font-['Prompt',_sans-serif] w-[297mm] min-h-[210mm] mx-auto overflow-hidden">
             <div className="text-center space-y-1 mb-8">
                 <h1 className="text-xl font-bold">รายงานผลการปฏิบัติงานนอกสถานที่ตั้งของส่วนราชการ</h1>
                 <h2 className="text-lg font-bold">(Work from Home)</h2>
