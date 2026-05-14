@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { auth } from '@/auth'
-import { writeFile, mkdir } from 'fs/promises'
+import { writeFile, mkdir, unlink } from 'fs/promises'
 import { existsSync } from 'fs'
 import path from 'path'
 
@@ -83,6 +83,71 @@ export async function POST(req: NextRequest) {
             { error: 'Failed to process upload', details: error instanceof Error ? error.message : 'Unknown error' },
             { status: 500 }
         )
+    }
+}
+
+export async function DELETE(req: NextRequest) {
+    const session = await auth()
+
+    if (!session?.user) {
+        return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = session.user as any
+    const { id } = await req.json()
+
+    if (!id) {
+        return NextResponse.json({ error: 'Missing upload ID' }, { status: 400 })
+    }
+
+    try {
+        const upload = await prisma.dataUpload.findUnique({
+            where: { id },
+            include: { schedule: true }
+        })
+
+        if (!upload) {
+            return NextResponse.json({ error: 'Upload not found' }, { status: 404 })
+        }
+
+        // Permission check
+        if (user.role !== 'ADMIN' && user.role !== 'EDITOR' && upload.uploaded_by !== parseInt(user.id.toString())) {
+            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+        }
+
+        const { schedule_id, filename } = upload
+
+        // 1. Delete the DataUpload record
+        await prisma.dataUpload.delete({ where: { id } })
+
+        // 2. Check if any other uploads exist for this schedule
+        const otherUploads = await prisma.dataUpload.count({
+            where: { schedule_id }
+        })
+
+        if (otherUploads === 0) {
+            await prisma.schedule.update({
+                where: { id: schedule_id },
+                data: { reported: 0 }
+            })
+        }
+
+        // 3. Check if file is still used by other records
+        const fileUsedByOthers = await prisma.dataUpload.count({
+            where: { filename }
+        })
+
+        if (fileUsedByOthers === 0) {
+            const filePath = path.join(process.cwd(), 'public', 'uploads', filename)
+            if (existsSync(filePath)) {
+                await unlink(filePath)
+            }
+        }
+
+        return NextResponse.json({ success: true })
+    } catch (error) {
+        console.error('Delete upload error:', error)
+        return NextResponse.json({ error: 'Failed to delete upload' }, { status: 500 })
     }
 }
 

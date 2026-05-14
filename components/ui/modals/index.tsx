@@ -14,7 +14,7 @@ export default function Modal({ isOpen, onClose, children }: ModalProps) {
     return (
         <>
             <div className="fixed inset-0 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-fadeIn">
-                <div className="backdrop-blur-lg rounded-2xl shadow-lg max-md:w-full lg:max-w-3/4">
+                <div className="card max-sm:w-full max-md:w-3/4 max-lg:w-1/2 xl:w-1/3 animate-scaleIn">
                     {children}
                 </div>
             </div>

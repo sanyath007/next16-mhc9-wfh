@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { useSession } from 'next-auth/react'
-import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X, Users, Loader2, Sparkles, ArrowRight } from 'lucide-react'
+import { Upload, FileText, CheckCircle2, AlertCircle, Clock, X, Users, Loader2, Sparkles, ArrowRight, Trash2 } from 'lucide-react'
 import moment from 'moment'
 import TagInput from '@/components/ui/forms/TagInput'
 import CustomSelect from '@/components/ui/forms/CustomSelect'
@@ -229,6 +229,7 @@ export default function UploadPage() {
                 setOcrText('')
                 setOcrWarning(null)
                 fetchHistory()
+                if (selectedEmployee) fetchSchedulesForEmployee(selectedEmployee)
             } else {
                 setResult({ success: false, message: json.error || 'เกิดข้อผิดพลาด' })
             }
@@ -236,6 +237,28 @@ export default function UploadPage() {
             setResult({ success: false, message: 'ไม่สามารถเชื่อมต่อได้' })
         } finally {
             setUploading(false)
+        }
+    }
+
+    const handleDeleteUpload = async (id: string) => {
+        if (!confirm('คุณแน่ใจหรือไม่ว่าต้องการลบข้อมูลการอัปโหลดนี้?')) return
+
+        try {
+            const res = await fetch('/api/upload', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id })
+            })
+
+            if (res.ok) {
+                fetchHistory()
+                if (selectedEmployee) fetchSchedulesForEmployee(selectedEmployee)
+            } else {
+                const json = await res.json()
+                alert(json.error || 'เกิดข้อผิดพลาดในการลบ')
+            }
+        } catch {
+            alert('ไม่สามารถเชื่อมต่อได้')
         }
     }
 
@@ -456,20 +479,29 @@ export default function UploadPage() {
                                 <div className="flex-1 min-w-0">
                                     <p className="font-medium text-slate-800 text-sm truncate">{upload.filename}</p>
                                     <p className="text-xs text-slate-500 mt-0.5">
-                                        โดย {upload.schedule?.employee?.firstname}
+                                        สำหรับวันที่ <span className="font-bold text-slate-700">{moment(upload.schedule?.work_date).locale('th').format('D MMMM')} {moment(upload.schedule?.work_date).year() + 543}</span> โดย {upload.schedule?.employee?.firstname}
                                     </p>
                                 </div>
-                                <div className="text-right shrink-0">
+                                <div className="text-right shrink-0 flex flex-col items-end gap-1">
                                     <div className="flex items-center gap-1.5 text-xs text-slate-500">
                                         <Clock className="w-3 h-3" />
                                         {new Date(upload.uploaded_at).toLocaleDateString('th-TH', {
                                             day: 'numeric', month: 'short', year: 'numeric',
                                             hour: '2-digit', minute: '2-digit'
                                         })}
+                                        {i === 0 && (
+                                            <span className="badge bg-brand-100 text-brand-700">ล่าสุด</span>
+                                        )}
                                     </div>
-                                    {i === 0 && (
-                                        <span className="badge bg-brand-100 text-brand-700 mt-1">ล่าสุด</span>
-                                    )}
+                                    <div className="flex items-center gap-2">
+                                        <button 
+                                            onClick={() => handleDeleteUpload(upload.id)}
+                                            className="p-1.5 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-all"
+                                            title="ลบรายการ"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         ))}

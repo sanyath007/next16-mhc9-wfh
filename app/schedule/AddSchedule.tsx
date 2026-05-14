@@ -97,8 +97,8 @@ const AddSchedule = ({ onSuccess }: { onSuccess: () => void }) => {
             </button>
 
             <Modal isOpen={showModal} onClose={() => setShowModal(false)}>
-                <div className="card min-w-lg p-4">
-                    <h1 className="mb-4">Add New Schedule</h1>
+                <div className="w-full p-6">
+                    <h1 className="mb-4">เพิ่มตารางงานใหม่</h1>
 
                     <div className="px-2">
                         <form className="space-y-2">

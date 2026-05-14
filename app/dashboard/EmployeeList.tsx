@@ -8,14 +8,6 @@ import { cn } from '@/lib/utils/tailwindcss'
 const EmployeeList = (
     { title, employees, isReport = false }: { title: string, employees?: any[] | null, isReport?: boolean }
 ) => {
-    const theaders = useMemo(() => {
-        if (isReport) {
-            return ['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน','รายงาน']
-        }
-
-        return ['ชื่อ-สกุล','ตำแหน่ง','กลุ่มงาน']
-    }, [isReport])
-
     const handleDownload = async (scheduleId: string) => {
         try {
             const response = await fetch(`/api/download?schedule_id=${scheduleId}`)
@@ -40,26 +32,48 @@ const EmployeeList = (
                 <table className="w-full">
                     <thead>
                         <tr className="bg-slate-50 border-b border-slate-100">
-                            {theaders.map((h: string, i: number) => (
-                                <th 
-                                    key={h}
-                                    className={cn(
-                                        `px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
-                                        !isReport ? 'w-1/3' : i < theaders.length - 1 ? 'w-[36%]' : 'w-1/12'
-                                    )}
-                                >
-                                    {h}
+                            <th className={cn(
+                                `px-5 max-md:px-0 max-md:pl-4 py-3 w-1/3 text-center text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
+                                !isReport ? 'w-[5%] max-md:w-[2%]' : 'w-[8%] max-md:w-[2%]'
+                            )}>
+                                ลำดับ
+                            </th>
+                            <th className={cn(
+                                `px-5 py-3 w-1/3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
+                                !isReport ? 'w-[25%] max-md:w-[28%]' : 'w-[36%] max-md:w-[38%]'
+                            )}>
+                                ชื่อ-สกุล
+                            </th>
+                            <th className={cn(
+                                `px-5 py-3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
+                                !isReport ? 'w-[25%] max-md:w-[40%]' : 'w-[34%] max-md:w-[40%]', 'max-sm:hidden'
+                            )}>
+                                ตำแหน่ง
+                            </th>
+                            <th className={cn(
+                                `px-5 py-3 w-1/3 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`,
+                                !isReport ? 'w-[25%]' : 'w-[36%]', 'max-md:hidden'
+                            )}>
+                                กลุ่มงาน
+                            </th>
+                            {isReport && (
+                                <th className={cn(`px-5 py-3 w-[10%] text-center text-xs font-semibold text-slate-500 uppercase tracking-wide whitespace-nowrap`)}>
+                                    รายงาน
                                 </th>
-                            ))}
+                            )}
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-50">
                         {employees && employees.map((employee, i) => (
                             <tr
                                 key={employee.id}
-                                className="hover:bg-brand-50/30 transition-colors cursor-pointer group animate-fadeInUp"
+                                className={cn(
+                                    `hover:bg-brand-50/30 transition-colors cursor-pointer group animate-fadeInUp`,
+                                    i === 2 && 'max-md:hidden'
+                                )}
                                 style={{ animationDelay: `${i * 60}ms` }}
                             >
+                                <td className="px-5 max-md:px-0 py-2 text-sm text-center">{i + 1}</td>
                                 <td className="px-5 py-2 text-sm">
                                     <div className="flex items-center gap-2">
                                         <span className="font-medium text-slate-900">
@@ -68,10 +82,10 @@ const EmployeeList = (
                                         {/* <ChevronRight className="w-3.5 h-3.5 text-brand-400 opacity-0 group-hover:opacity-100 transition-opacity" /> */}
                                     </div>
                                 </td>
-                                <td className="px-5 py-2 text-sm text-slate-600">
+                                <td className={cn(`px-5 py-2 text-sm text-slate-600`, 'max-sm:hidden')}>
                                     {employee.position?.name}{employee.level ? employee.level?.name !== 'ต้น' ? employee.level?.name : '' : ''}
                                 </td>
-                                <td className="px-5 py-2 text-sm text-slate-600">
+                                <td className={cn(`px-5 py-2 text-sm text-slate-600`, 'max-md:hidden')}>
                                     {employee.members[0]?.department?.name}
                                 </td>
                                 {isReport && <td className="px-5 py-2 text-center">
