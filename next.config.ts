@@ -12,7 +12,15 @@ const nextConfig: NextConfig = {
         ]
       }
     ]
-  }
+  },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/docuseal/:path*',
+  //       destination: `http://localhost:9000/:path*`,
+  //     },
+  //   ]
+  // },
 };
 
 export default nextConfig;
