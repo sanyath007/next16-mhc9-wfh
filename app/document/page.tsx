@@ -1,39 +1,57 @@
 "use client";
 
 import { DocusealForm  } from "@docuseal/react";
-import { useEffect, useState } from "react";
-import Script from "next/script";
+import { useCallback, useEffect, useState } from "react";
 
 export default function SchedulePage() {
     const [slug, setSlug] = useState('');
 
-    useEffect(() => {
-        fetch('/api/docuseal/init_form', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                templateId: 1,
-                signerEmail: 'sanyath007@gmail.com',
-                signerName: null,
+    const initForm = useCallback(() => {
+            fetch('/api/docuseal/init_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    templateId: 1,
+                    signerEmail: 'sanyath007@gmail.com',
+                    signerName: null,
+                })
             })
-        })
-        .then(async (resp) => {
-            const { slug } = await resp.json();
-            console.log(slug);
+            .then(async (resp) => {
+                const { slug } = await resp.json();
+                console.log(slug);
 
-            setSlug(slug);
-        });
+                setSlug(slug);
+            });
+    }, []);
+
+    const setEmail = useCallback(() => {
+            fetch('/api/docuseal/submissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    templateId: 1,
+                    signerEmail: 'sanyath007@gmail.com',
+                    signerName: null,
+                })
+            })
+            .then(async (resp) => {
+                const { slug } = await resp.json();
+                console.log(slug);
+
+                setSlug(slug);
+            });
+    }, []);
+
+    useEffect(() => {
+        initForm();
     }, []);
 
     return (
         <div className="space-y-8">
-            <Script
-                id="docuseal-form-script"
-                src="http://localhost:9000/js/form.js"
-                strategy="afterInteractive"
-            />
             {/* Header */}
             <div className="flex items-start justify-between">
                 <div>
@@ -52,13 +70,14 @@ export default function SchedulePage() {
                     //         console.log('Form completed:', data);
                     //     }}
                     // />
-                    <iframe
-                        src={`http://localhost:9000/s/${slug}`}
-                        width="100%"
-                        height="800px"
-                        style={{ border: 'none' }}
+                    // <iframe
+                    //     src={`http://localhost:9000/s/${slug}`}
+                    //     width="100%"
+                    //     height="800px"
+                    //     style={{ border: 'none' }}
                         
-                    />
+                    // />
+                    <></>
                 ) : (
                     <div className="flex flex-col items-center justify-center p-12 space-y-4">
                         <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
