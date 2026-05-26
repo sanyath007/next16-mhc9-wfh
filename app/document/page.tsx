@@ -1,55 +1,9 @@
 "use client";
 
-import { DocusealForm  } from "@docuseal/react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import SignaturePad from "signature_pad";
 
-export default function SchedulePage() {
-    const [slug, setSlug] = useState('');
-
-    const initForm = useCallback(() => {
-            fetch('/api/docuseal/init_form', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    templateId: 1,
-                    signerEmail: 'sanyath007@gmail.com',
-                    signerName: null,
-                })
-            })
-            .then(async (resp) => {
-                const { slug } = await resp.json();
-                console.log(slug);
-
-                setSlug(slug);
-            });
-    }, []);
-
-    const setEmail = useCallback(() => {
-            fetch('/api/docuseal/submissions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    templateId: 1,
-                    signerEmail: 'sanyath007@gmail.com',
-                    signerName: null,
-                })
-            })
-            .then(async (resp) => {
-                const { slug } = await resp.json();
-                console.log(slug);
-
-                setSlug(slug);
-            });
-    }, []);
-
-    useEffect(() => {
-        initForm();
-    }, []);
-
+export default function SignPage() {
     return (
         <div className="space-y-8">
             {/* Header */}
@@ -61,30 +15,34 @@ export default function SchedulePage() {
             </div>
 
             <div className="flex justify-center max-md:flex-col gap-4 p-4 bg-white/50 backdrop-blur-sm rounded-xl">
-                {slug ? (
-                    // <DocusealForm
-                    //     host="localhost:9000"
-                    //     src={`http://localhost:9000/s/${slug}`}
-                    //     email="sanyath007@gmail.com"
-                    //     onComplete={(data) => {
-                    //         console.log('Form completed:', data);
-                    //     }}
-                    // />
-                    // <iframe
-                    //     src={`http://localhost:9000/s/${slug}`}
-                    //     width="100%"
-                    //     height="800px"
-                    //     style={{ border: 'none' }}
-                        
-                    // />
-                    <></>
-                ) : (
-                    <div className="flex flex-col items-center justify-center p-12 space-y-4">
-                        <div className="w-12 h-12 border-4 border-sky-500 border-t-transparent rounded-full animate-spin"></div>
-                        <p className="text-slate-500">กำลังเตรียมแบบฟอร์ม...</p>
-                    </div>
-                )}
+                
             </div>
         </div>
     );
+}
+
+export function SignatureCanvas({ onSave }: { onSave: (dataUrl: string) => void }) {
+    const canvasRef = useRef<HTMLCanvasElement | null>(null)
+    const padRef = useRef<SignaturePad | null>(null)
+
+    useEffect(() => {
+        padRef.current = new SignaturePad(canvasRef.current as HTMLCanvasElement, {
+            backgroundColor: 'rgb(255,255,255)',
+            penColor: 'rgb(0,0,0)',
+        })
+    }, [])
+
+    const handleSave = () => {
+        if (!padRef.current?.isEmpty()) {
+            onSave(padRef.current!.toDataURL('image/png'))
+        }
+    }
+
+    return (
+        <>
+            <canvas ref={canvasRef} width={500} height={200} className="border rounded" />
+            <button onClick={() => padRef.current?.clear()}>Clear</button>
+            <button onClick={handleSave}>Confirm Signature</button>
+        </>
+    )
 }
